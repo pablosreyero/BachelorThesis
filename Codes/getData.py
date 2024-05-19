@@ -17,6 +17,7 @@ from collections import defaultdict
 from copy import deepcopy
 import json
 import sys
+import cv2
 
 
 def get_data(input_path):
