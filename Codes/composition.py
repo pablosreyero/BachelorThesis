@@ -60,4 +60,9 @@ class Composition(object):
         """
         Show system configuration
         """
-        
+        print("\nConfiguration parameters: ")
+        for conf_param in dir(self):
+            if not conf_param.startswith("__") and not callable(getattr(self, a)):
+                print("{:30} {}".format(a, getattr(self, conf_param)))
+        print("\n")
+
