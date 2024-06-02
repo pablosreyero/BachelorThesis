@@ -56,7 +56,7 @@ class Composition(object):
 
     MODEL_PATH = None
 
-    def show_composition(self):
+    def show_composition(self): # change this
         """
         Show system configuration
         """
