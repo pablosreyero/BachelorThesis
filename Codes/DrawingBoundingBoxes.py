@@ -53,7 +53,7 @@ class configuration:
             self.anchor_box_scales = [16, 32, 64] #this is must to achieve multiscale detection
 
             # Anchor box ratios
-            self.anchor_box_ratios = [[1, 1], [1./math.sqrt(2), 2./math.sqrt(2)], [2./math.sqrt(2), 1./math.sqrt(2)]]
+            self.anchor_box_ratios = [[1, 1], [1./math.sqrt(2), 2./math.sqrt(2)], [2./math.sqrt(2), 1./math.sqrt(2)]] # this ratios are not OK
 
             # Size to resize the smallest side of the image
             # Original setting in paper is 600. Set to 300 in here to save training time
@@ -94,7 +94,8 @@ class configuration:
 #train_path =  ''
 output_weight_path = '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/model_frcnn_vgg.hdf5'
 record_path = '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/record.csv'
-base_weight_path =  '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/vgg16_weights_tf_dim_ordering_tf_kernels.h5'
+# base_weight_path =  '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/vgg16_weights_tf_dim_ordering_tf_kernels.h5'
+base_weight_path = '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/mask_rcnn_coco.h5'
 config_output_filename = '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/model_vgg_config.pickle'
 num_rois = 4
 
