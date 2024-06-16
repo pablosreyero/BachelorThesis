@@ -36,7 +36,8 @@ class configuration:
     def __init__(self):
                 
             # Print the process or not
-            self.verbose = True
+            self.verbose = False
+            self.train_verbose = True
 
             # Name of base network
             self.network = 'vgg'
@@ -57,10 +58,11 @@ class configuration:
 
             # Size to resize the smallest side of the image
             # Original setting in paper is 600. Set to 300 in here to save training time
-            self.im_size = 300
+            self.im_size = 800 # this was 300
 
             # image channel-wise mean to subtract
-            self.img_channel_mean = [103.939, 116.779, 123.68]
+            # self.img_channel_mean = [103.939, 116.779, 123.68]
+            self.img_channel_mean = [100, 100, 100]
             self.img_scaling_factor = 1.0
 
             # number of ROIs at once
@@ -112,11 +114,9 @@ C.use_vertical_flips = vertical_flips
 C.rot_90 = rot_90
 C.num_rois = num_rois
 
-
 C.record_path = record_path
 C.model_path = output_weight_path
 C.base_net_weights = base_weight_path
-
 
 #Calling the main to invoke other functions
 funciones.main(C,output_weight_path,record_path,base_weight_path,config_output_filename)

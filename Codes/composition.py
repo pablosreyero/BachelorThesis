@@ -66,3 +66,4 @@ class Composition(object):
                 print("{:30} {}".format(conf_param, getattr(self, conf_param)))
         print("\n")
 
+Composition.show_composition(self)

@@ -161,8 +161,9 @@ def get_anchor_gt(all_img_data, C, img_length_calc_function, mode='train'):
 	while True:
 		#print('QUÉ ESTÁ PASANDO AQUÍ-------------') #esto ya no lo imprime
 		for img_data in all_img_data:
-			print('Este es el image data detro del newsizeAugment: ',img_data)
-			print(len(img_data[1]['boxes']))
+			if C.verbose:
+				print('Este es el image data detro del newsizeAugment: ',img_data)
+				print(len(img_data[1]['boxes']))
 			try:
 				
 				# read in image, and optionally add augmentation

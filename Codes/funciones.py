@@ -70,7 +70,7 @@ def read_ground_truth(current_directory,ground_truth_name_file,sorted_images):
     }
     return image_data
 
-def boundingBox(current_directory,image_data):
+def boundingBox(C,current_directory,image_data):
 
     image_title = image_data["Titulos"]
     ID = image_data["ID"]
@@ -86,15 +86,16 @@ def boundingBox(current_directory,image_data):
     y1 = [int(float(i)) for i in y1]
     y2 = [int(float(i)) for i in y2]
 
-    print(x1,x2,y1,y2)
-    print("\n")
-    print("Este es el directorio en el que tengo que trabajar; \t", current_directory)
-    print("\n")
-    print("Ahora probamos la implementación que queríamos poner bien")
+    if C.verbose:
+        print(x1,x2,y1,y2)
+        print("\n")
+        print("Este es el directorio en el que tengo que trabajar; \t", current_directory)
+        print("\n")
+        print("Ahora probamos la implementación que queríamos poner bien")
     
     titlesn = []
     final_dic = {}
-    print(image_title)
+    if C.verbose: print(image_title)
     for title in image_title:
         for iter,index in enumerate(ID): #tengo que iterar dentro del diccionario para poder coger tambien las coordenadas al mismo tiempo
             if(int(title[6:10]) == int(float(index))):
@@ -106,9 +107,10 @@ def boundingBox(current_directory,image_data):
                     titlesn.append(title) #dejar la ruta desde castings
                     final_dic[image_path] = {'w': data_image1.width,'h': data_image1.height,'boxes': [{'class': 'defects' , 'x1': int(x1[iter]),'y1': int(y1[iter]),'x2': int(x2[iter]),'y2': int(y2[iter])}]} #Añadir un diccionario en title 
                     #Aqui en vez de poner el titulo de cada imagen estamos poniendo la ruta de cada imagen
-    print("\n")
-    print(final_dic)
-    print("\n")
+    if C.verbose:
+        print("\n")
+        print(final_dic)
+        print("\n")
     
     #Ahora pintamos 
     for keys, stuff in final_dic.items(): #Para el append de los directorios puedo utilizar la funcion join: os.path.join
@@ -139,7 +141,7 @@ def boundingBox(current_directory,image_data):
     return final_dic
         #Lo que tengo que hacer es que el codigo lea el archivo .txt  del enlace que me mandó Maria José y segun vaya leyendo las imagenes que ya me dicen, el codigo tiene que saber de que imagen se trata y por ende hacer un dssplay de la información de dicha imagen
 
-def reading_train_test (final_dic):
+def reading_train_test (C,final_dic):
 
     train_list = []
     test_list = []
@@ -158,29 +160,34 @@ def reading_train_test (final_dic):
         if fichiers == ('castings_test.txt'):
             image_title_test = [x for x in open('castings_test.txt').readlines()] #Aqui estamos recorriendo el archivo MODIFICADO, ANTES; image_title_test = [os.path.basename(x) for x in open('castings_test.txt').readlines()]
             image_title_test = [s.rstrip() for s in image_title_test] #Aqui le estamos quitando el simbolo de salto de linea \n
-            print('\n')
-            print("This are all TEST images")
-            print('\n')
-            print(image_title_test)
-            print('\n')
+
+            if C.verbose:
+                print('\n')
+                print("This are all TEST images")
+                print('\n')
+                print(image_title_test)
+                print('\n')
         if fichiers == ('castings_train.txt'):
             image_title_train = [x for x in open('castings_train.txt').readlines()] #Aqui estamos recorriendo el archivo, MODIFICADO: image_title_train = [os.path.basename(x) for x in open('castings_train.txt').readlines()]
             image_title_train = [s.rstrip() for s in image_title_train] #Aqui le estamos quitando el simbolo de salto de linea \n
-            print('\n')
-            print("This are all TRAIN images")
-            print('\n')
-            print(image_title_train)
-            print('\n')
+
+            if C.verbose:
+                print('\n')
+                print("This are all TRAIN images")
+                print('\n')
+                print(image_title_train)
+                print('\n')
     
     #Now that we have the titles of both train and test images that will be implemented later on, we proceed by giving the user information about these images
-    print("Now information of each TEST image will be printed")
-    print('\n')
+    if C.verbose:
+        print("Now information of each TEST image will be printed")
+        print('\n')
 
     name_list1 = []
     for iter in final_dic.keys():
         name_list1.append(iter[59:])
         #name_list1.append(iter)
-    print(name_list1)
+    if C.verbose: print(name_list1)
 
     for i in image_title_test: #Como ahora ya no tengo solo los titulos de las imagenes si no que no tengo también las rutas completas de las imágenes, tengo que cambiar esta parte también
         if i in name_list1:
@@ -239,8 +246,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     #Then, we iterate trough all items inside sorted_folders in order to keep folders that only host images
     for j,item in enumerate(sorted_folders):
         if item[0] != "C":
-            sorted_folders.pop(j) 
-    print(sorted_folders)
+            sorted_folders.pop(j)
+    if C.verbose: print(sorted_folders)
 
     merged_dictionary = {}
     for iter, chose in enumerate(sorted_folders):
@@ -254,8 +261,9 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 aux_img.append(images)
         
         #Aqui chequeamos que nos encontramos en el directorio correcto
-        print("El directorio en el que te encuentras es el siguiente :", os.getcwd() + "\n")
-        print("\n")
+        if C.verbose:
+            print("El directorio en el que te encuentras es el siguiente :", os.getcwd() + "\n")
+            print("\n")
 
         buff = []
         for images in os.listdir(current_dir):
@@ -271,33 +279,35 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
                     #A la hora de leer las imagenes del directorio C001, me sacaba la imagen 8 repetida, por ello SE ELIMINAN LOS DUPLICADOS EN LA SIGUIENTE LINEA.
                     aux_img = list(dict.fromkeys(aux_img))
-                    print("\n")
-                    print("Este es el aux_img:" , sorted(aux_img))
+                    if C.verbose:
+                        print("\n")
+                        print("Este es el aux_img:" , sorted(aux_img))
 
                     image_data = read_ground_truth(current_directory,images,sorted(aux_img))
-                    final_dic = boundingBox(current_directory,image_data)
+                    final_dic = boundingBox(C,current_directory,image_data)
                     merged_dictionary = merged_dictionary | final_dic #We merge the dictionary each iteration
 
         else:
-            print("El directorio: " + str(current_dir) + " NO contiene imágenes con defectos")
-            print("\n")
-            
-    print("\n")
-    print("Este es el diccionario final: ", merged_dictionary)
-    print("\n")
+            if C.verbose:
+                print("El directorio: " + str(current_dir) + " NO contiene imágenes con defectos")
+                print("\n")
+    if C.verbose:       
+        print("\n")
+        print("Este es el diccionario final: ", merged_dictionary)
+        print("\n")
     #Now that we have our dictionary with all items we search for train and test images only
-    test_list, train_list, classes_count1, classes_count2, class_mapping = reading_train_test(merged_dictionary)
+    test_list, train_list, classes_count1, classes_count2, class_mapping = reading_train_test(C,merged_dictionary)
 
+    if C.verbose:
+        print(test_list)
+        print("\n")
+        print(train_list)
+        print("\n")
+        print("Número de defectos en castings_test.txt", classes_count1)
+        print("Número de defectos en castings_train.txt", classes_count2)
 
-    print(test_list)
-    print("\n")
-    print(train_list)
-    print("\n")
-    print("Número de defectos en castings_test.txt", classes_count1)
-    print("Número de defectos en castings_train.txt", classes_count2)
-
-    print('Esto es class_mappings', class_mapping)
-    print('Esto es class_count2',classes_count2)
+        print('Esto es class_mappings', class_mapping)
+        print('Esto es class_count2',classes_count2)
 
     if 'bg' not in classes_count2:
         classes_count2['bg'] = 0
@@ -305,14 +315,17 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
     C.class_mapping = class_mapping
 
-    print('Esto es classes_count2: ',classes_count2)
-    print('Esto es class_mapping: ',class_mapping)
+    if C.verbose:
+        print('Esto es classes_count2: ',classes_count2)
+        print('Esto es class_mapping: ',class_mapping)
 
     #Now that we have all of our data extracted from .txts and images, we proceed by augmenting existing data since we are assuming an overfitting
     all_img_data = train_list
-    print("Estos son los datos que nos interesan")
-    print("\n")
-    #print(all_img_data)
+
+    if C.verbose:
+        print("Estos son los datos que nos interesan")
+        print("\n")
+        #print(all_img_data)
 
     #-------------HERE WE SHUEFFLE THE IMAGES WITH A RANDOM SEED-------------#
     random.seed(5)
@@ -324,19 +337,20 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     X, Y, image_data, debug_img, debug_num_pos = next(train_data_gen)
 
 
-    print('Esto es el image data',image_data)
+    if C.verbose: print('Esto es el image data',image_data)
     
     #Aqui ya se empieza a pasar los datos de entreno
-    print('Original image: height=%d width=%d'%(image_data[1]['h'], image_data[1]['w']))
-    print('Resized image:  height=%d width=%d C.im_size=%d'%(X.shape[1], X.shape[2], C.im_size))
-    print('Feature map size: height=%d width=%d C.rpn_stride=%d'%(Y[0].shape[1], Y[0].shape[2], C.rpn_stride))
-    print(X.shape)
-    print(str(len(Y))+" includes 'y_rpn_cls' and 'y_rpn_regr'")
-    print('Shape of y_rpn_cls {}'.format(Y[0].shape))
-    print('Shape of y_rpn_regr {}'.format(Y[1].shape))
-    print(image_data)
+    if C.verbose:
+        print('Original image: height=%d width=%d'%(image_data[1]['h'], image_data[1]['w']))
+        print('Resized image:  height=%d width=%d C.im_size=%d'%(X.shape[1], X.shape[2], C.im_size))
+        print('Feature map size: height=%d width=%d C.rpn_stride=%d'%(Y[0].shape[1], Y[0].shape[2], C.rpn_stride))
+        print(X.shape)
+        print(str(len(Y))+" includes 'y_rpn_cls' and 'y_rpn_regr'")
+        print('Shape of y_rpn_cls {}'.format(Y[0].shape))
+        print('Shape of y_rpn_regr {}'.format(Y[1].shape))
+        print(image_data)
+        print('Number of positive anchors for this image: %d' % (debug_num_pos))
 
-    print('Number of positive anchors for this image: %d' % (debug_num_pos))
     if debug_num_pos==0:
         gt_x1, gt_x2 = image_data[1]['boxes'][0][0]*(X.shape[2]/image_data[1]['h']), image_data[1]['boxes'][0][2]*(X.shape[2]/image_data[1]['h'])
         gt_y1, gt_y2 = image_data[1]['boxes'][0][1]*(X.shape[1]/image_data[1]['w']), image_data[1]['boxes'][0][3]*(X.shape[1]/image_data[1]['w'])
@@ -355,12 +369,13 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     else:
         cls = Y[0][0]
         pos_cls = np.where(cls==1)
-        print(pos_cls)
+        if C.verbose: print(pos_cls)
         regr = Y[1][0]
         pos_regr = np.where(regr==1)
-        print(pos_regr)
-        print('y_rpn_cls for possible pos anchor: {}'.format(cls[pos_cls[0][0],pos_cls[1][0],:]))
-        print('y_rpn_regr for positive anchor: {}'.format(regr[pos_regr[0][0],pos_regr[1][0],:]))
+        if C.verbose:
+            print(pos_regr)
+            print('y_rpn_cls for possible pos anchor: {}'.format(cls[pos_cls[0][0],pos_cls[1][0],:]))
+            print('y_rpn_regr for positive anchor: {}'.format(regr[pos_regr[0][0],pos_regr[1][0],:]))
 
         gt_x1, gt_x2 = image_data[1]['boxes'][0]['x1']*(X.shape[2]/image_data[1]['w']), image_data[1]['boxes'][0]['x2']*(X.shape[2]/image_data[1]['w'])
         gt_y1, gt_y2 = image_data[1]['boxes'][0]['y1']*(X.shape[1]/image_data[1]['h']), image_data[1]['boxes'][0]['y2']*(X.shape[1]/image_data[1]['h'])
@@ -391,13 +406,13 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
             anchor_ratio = C.anchor_box_ratios[2-int((idx+1)%3)]
 
             center = (pos_regr[1][i*4]*C.rpn_stride, pos_regr[0][i*4]*C.rpn_stride)
-            print('Center position of positive anchor: ', center)
+            if C.verbose: print('Center position of positive anchor: ', center)
             cv2.circle(img, center, 3, color, -1)
             anc_w, anc_h = anchor_size*anchor_ratio[0], anchor_size*anchor_ratio[1]
             cv2.rectangle(img, (center[0]-int(anc_w/2), center[1]-int(anc_h/2)), (center[0]+int(anc_w/2), center[1]+int(anc_h/2)), color, 2)
     #         cv2.putText(img, 'pos anchor bbox '+str(i+1), (center[0]-int(anc_w/2), center[1]-int(anc_h/2)-5), cv2.FONT_HERSHEY_DUPLEX, 0.5, color, 1)
 
-    print('Green bboxes is ground-truth bbox. Others are positive anchors')
+    if C.verbose: print('Green bboxes is ground-truth bbox. Others are positive anchors')
     plt.figure(figsize=(8,8))
     plt.grid()
     plt.imshow(img)
@@ -435,17 +450,17 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     #if conditional_testing:
         #If this is the begin of the training, load the pre-traind base network such as vgg-16
         try:
-            print('This is the first time of your training')
-            print('loading weights from {}'.format(C.base_net_weights))
+            if C.verbose: print('This is the first time of your training')
+            if C.verbose: print('loading weights from {}'.format(C.base_net_weights))
             model_rpn.load_weights(C.base_net_weights, by_name=True)
             model_classifier.load_weights(C.base_net_weights, by_name=True)
         except:
-            print('Could not load pretrained model weights. Weights can be found in the keras application folder \
+            if C.verbose: print('Could not load pretrained model weights. Weights can be found in the keras application folder \
                 https://github.com/fchollet/keras/tree/master/keras/applications')
         
         # Create the record.csv file to record losses, acc and mAP
         record_df = pd.DataFrame(columns=['mean_overlapping_bboxes', 'class_acc', 'loss_rpn_cls', 'loss_rpn_regr', 'loss_class_cls', 'loss_class_regr', 'curr_loss', 'elapsed_time', 'mAP'])
-        print(record_df.to_string()) #Empty data frame
+        if C.verbose: print(record_df.to_string()) #Empty data frame
     else:
         # If this is a continued training, load the trained model from before
         print('Continue training based on previous trained model')
@@ -698,7 +713,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     mean_overlapping_bboxes = float(sum(rpn_accuracy_for_epoch)) / len(rpn_accuracy_for_epoch)
                     rpn_accuracy_for_epoch = []
 
-                    if C.verbose:
+                    if C.train_verbose:
                         print('Mean number of bounding boxes from RPN overlapping ground truth boxes: {}'.format(mean_overlapping_bboxes))
                         print('Classifier accuracy for bounding boxes from RPN: {}'.format(class_acc))
                         print('Loss RPN classifier: {}'.format(loss_rpn_cls))
@@ -714,7 +729,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     start_time = time.time()
 
                     if curr_loss < best_loss:
-                        if C.verbose:
+                        if C.train_verbose:
                             print('Total loss decreased from {} to {}, saving weights'.format(best_loss,curr_loss))
                         best_loss = curr_loss
                         model_all.save_weights(C.model_path)

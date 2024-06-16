@@ -20,7 +20,7 @@ import sys
 import cv2
 
 
-def get_data(input_path):
+def get_data(verbose, input_path):
 
     found_bg = False
     all_imgs = {}
@@ -33,7 +33,7 @@ def get_data(input_path):
     i = 1
 
     with open(input_path,'r') as f:
-        print('Parsing annotation files')
+        if verbose: print('Parsing annotation files')
 
         for line in f:
         
@@ -42,8 +42,9 @@ def get_data(input_path):
             i += 1
             
             line_split = line.strip().split(',')
-            print("\n")
-            print(line_split)
+            if verbose:
+                print("\n")
+                print(line_split)
             
             # Make sure the info saved in annotation file matching the format (path_filename, x1, y1, x2, y2, class_name)
             # Note:
@@ -61,7 +62,7 @@ def get_data(input_path):
             
             if class_name not in class_mapping:
                 if class_name == 'bg' and found_bg == False:
-                    print('Found class name with special name bg. Will be treated as a background region (this is usually for hard negative mining).')
+                    if verbose: print('Found class name with special name bg. Will be treated as a background region (this is usually for hard negative mining).')
                     found_bg = True
                 class_mapping[class_name] = len(class_mapping)
             
@@ -81,7 +82,6 @@ def get_data(input_path):
             
             all_imgs[filename]['bboxes'].append({'class': class_name, 'x1': int(x1), 'x2': int(x2), 'y1': int(y1), 'y2': int(y2)})
 
-
         all_data = []
         for key in all_imgs:
             all_data.append(all_imgs[key])
@@ -98,12 +98,15 @@ def get_data(input_path):
 
 
 def main():
+    verbose = False
     input_path = "/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/Ferguson/metadata/gdxray/castings_test.txt"
-    all_data, classes_count, class_mapping = get_data(input_path)
-    print("\n")
-    print(all_data)
-    print("\n")
-    print(classes_count)
-    print("\n")
-    print(class_mapping)
+    all_data, classes_count, class_mapping = get_data(verbose, input_path)
+
+    if verbose:
+        print("\n")
+        print(all_data)
+        print("\n")
+        print(classes_count)
+        print("\n")
+        print(class_mapping)
 main()
