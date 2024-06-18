@@ -36,199 +36,7 @@ import layers
 import losses
 import rpn_to_roi
 import traceback
-
-def list_sorting(item):
-    
-    n = len(item)
-    for i in range(n):
-
-    # Traverse the list from 0 to n-i-1
-    # (The last element will already be in place after first pass, so no need to re-check)
-        for j in range(0, n-i-1):
-
-             # Swap if current element is greater than next
-            if item[j] > item[j+1]:
-                item[j], item[j+1] = item[j+1],item[j]
-            
-    return item
-
-def read_ground_truth(current_directory,ground_truth_name_file,sorted_images):
-
-    image_ID= [x.split('   ')[1] for x in open('ground_truth.txt').readlines()]
-    x1 = [x.split('   ')[2] for x in open('ground_truth.txt').readlines()]
-    x2 = [x.split('   ')[3] for x in open('ground_truth.txt').readlines()]
-    y1 = [x.split('   ')[4] for x in open('ground_truth.txt').readlines()]
-    y2 = [x.split('   ')[5] for x in open('ground_truth.txt').readlines()]
-
-    image_data = {
-        "Titulos" : sorted_images,
-        "ID": image_ID,
-        "x1": x1,
-        "x2": x2,
-        "y1": y1,
-        "y2": y2
-    }
-    return image_data
-
-def boundingBox(C,current_directory,image_data):
-
-    image_title = image_data["Titulos"]
-    ID = image_data["ID"]
-    x1 = image_data["x1"]
-    x2 = image_data["x2"]
-    y1 = image_data["y1"]
-    y2 = image_data["y2"]
-    y2 = [s.rstrip() for s in y2] #in order to remove the \n command at the end
-
-    #CONVERTING FROM FLOAT TO INTEGER
-    x1 = [int(float(i)) for i in x1]
-    x2 = [int(float(i)) for i in x2]
-    y1 = [int(float(i)) for i in y1]
-    y2 = [int(float(i)) for i in y2]
-
-    if C.verbose:
-        print(x1,x2,y1,y2)
-        print("\n")
-        print("Este es el directorio en el que tengo que trabajar; \t", current_directory)
-        print("\n")
-        print("Ahora probamos la implementación que queríamos poner bien")
-    
-    titlesn = []
-    final_dic = {}
-    if C.verbose: print(image_title)
-    for title in image_title:
-        for iter,index in enumerate(ID): #tengo que iterar dentro del diccionario para poder coger tambien las coordenadas al mismo tiempo
-            if(int(title[6:10]) == int(float(index))):
-                image_path = os.path.join(current_directory,title)
-                data_image1 = Image.open(image_path)
-                if title in titlesn:
-                    final_dic[image_path]['boxes'].append({'class': 'defects' , 'x1': int(x1[iter]),'y1': int(y1[iter]),'x2': int(x2[iter]),'y2': int(y2[iter])}) #CAMBIAR TITLE por IMAGE_PATH URGENTEEEEEEEEEE
-                else:
-                    titlesn.append(title) #dejar la ruta desde castings
-                    final_dic[image_path] = {'w': data_image1.width,'h': data_image1.height,'boxes': [{'class': 'defects' , 'x1': int(x1[iter]),'y1': int(y1[iter]),'x2': int(x2[iter]),'y2': int(y2[iter])}]} #Añadir un diccionario en title 
-                    #Aqui en vez de poner el titulo de cada imagen estamos poniendo la ruta de cada imagen
-    if C.verbose:
-        print("\n")
-        print(final_dic)
-        print("\n")
-    
-    #Ahora pintamos 
-    for keys, stuff in final_dic.items(): #Para el append de los directorios puedo utilizar la funcion join: os.path.join
-        #print(keys,stuff)
-
-        #image_path = os.path.join(current_directory,keys) #Esta linea es muy importante
-        #print("\n")
-        img = read_image(keys)
-        box = []
-        box11 = []
-        box12 = []
-        for j in stuff['boxes']:
-            for k in range(len(final_dic[keys])):
-                if j not in box:
-                    box.append(j)
-                    box11 = list(j.values())
-                    box11.pop(0)
-                    box12.append(box11)
-
-        box12 = torch.tensor(box12, dtype=torch.int)
-        img = draw_bounding_boxes(img, box12, width=1, colors='red', fill=True)
-                            
-        # transform this image to PIL image
-        img = torchvision.transforms.ToPILImage()(img)
-        
-        #img.show()
-
-    return final_dic
-        #Lo que tengo que hacer es que el codigo lea el archivo .txt  del enlace que me mandó Maria José y segun vaya leyendo las imagenes que ya me dicen, el codigo tiene que saber de que imagen se trata y por ende hacer un dssplay de la información de dicha imagen
-
-def reading_train_test (C,final_dic):
-
-    train_list = []
-    test_list = []
-    classes_count1 = {}
-    classes_count2 = {}
-    class_mapping = {}
-    defects_test = 0
-    defects_train = 0
-
-    route = "/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/Ferguson/metadata/gdxray"
-    route_to_add = "/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/"
-
-    os.chdir(route)
-    for fichiers in os.listdir(route):
-        print(fichiers)
-        if fichiers == ('castings_test.txt'):
-            image_title_test = [x for x in open('castings_test.txt').readlines()] #Aqui estamos recorriendo el archivo MODIFICADO, ANTES; image_title_test = [os.path.basename(x) for x in open('castings_test.txt').readlines()]
-            image_title_test = [s.rstrip() for s in image_title_test] #Aqui le estamos quitando el simbolo de salto de linea \n
-
-            if C.verbose:
-                print('\n')
-                print("This are all TEST images")
-                print('\n')
-                print(image_title_test)
-                print('\n')
-        if fichiers == ('castings_train.txt'):
-            image_title_train = [x for x in open('castings_train.txt').readlines()] #Aqui estamos recorriendo el archivo, MODIFICADO: image_title_train = [os.path.basename(x) for x in open('castings_train.txt').readlines()]
-            image_title_train = [s.rstrip() for s in image_title_train] #Aqui le estamos quitando el simbolo de salto de linea \n
-
-            if C.verbose:
-                print('\n')
-                print("This are all TRAIN images")
-                print('\n')
-                print(image_title_train)
-                print('\n')
-    
-    #Now that we have the titles of both train and test images that will be implemented later on, we proceed by giving the user information about these images
-    if C.verbose:
-        print("Now information of each TEST image will be printed")
-        print('\n')
-
-    name_list1 = []
-    for iter in final_dic.keys():
-        name_list1.append(iter[59:])
-        #name_list1.append(iter)
-    if C.verbose: print(name_list1)
-
-    for i in image_title_test: #Como ahora ya no tengo solo los titulos de las imagenes si no que no tengo también las rutas completas de las imágenes, tengo que cambiar esta parte también
-        if i in name_list1:
-            i_prime = os.path.join(route_to_add,i)
-            test_string = str(i_prime) + " -> " + str(final_dic[i_prime]) #MODIFICADO, ANTES: test_string = str(i) + " -> " + str(final_dic[i_prime])
-            defects_test_aux = len(final_dic[i_prime]['boxes']) #i es un string
-            defects_test += defects_test_aux
-            test_list.append(test_string)
-    
-    classes_count1['defects'] = defects_test
-    
-    print("\n")
-    print("Now information of each TRAIN image will be printed")
-    print("\n")
-
-    name_list2 = []
-    for iter in final_dic.keys():
-        name_list2.append(iter[59:])
-    
-    
-    for j in image_title_train:
-        if j in name_list2: #MODIFICADO, ANTES: if j in final_dict
-            j_prime = os.path.join(route_to_add,j)
-            train_string = [str(j_prime),(final_dic[j_prime])] #MODIFICADO, ANTES: test_string = str(j) + " -> " + str(final_dic[j_prime])
-            #print(train_string)
-            defects_train_aux = len(final_dic[j_prime]['boxes'])
-            defects_train += defects_train_aux
-            train_list.append(train_string)
-
-    classes_count2['defects'] = defects_train
-
-    if 'defects' not in class_mapping:
-        class_mapping['defects'] = len(class_mapping)
-    
-    return test_list, train_list, classes_count1, classes_count2, class_mapping
-
-def get_img_output_length(width, height):
-    def get_output_length(input_length):
-        return input_length//16
-
-    return get_output_length(width), get_output_length(height)  
+import utils
 
 
 def main(C,output_weight_path,record_path,base_weight_path,config_output_filename):
@@ -241,7 +49,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         x.append(folders)
 
     #Now we sort the extracted folders
-    sorted_folders = list_sorting(x)
+    sorted_folders = utils.list_sorting(x)
 
     #Then, we iterate trough all items inside sorted_folders in order to keep folders that only host images
     for j,item in enumerate(sorted_folders):
@@ -283,8 +91,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                         print("\n")
                         print("Este es el aux_img:" , sorted(aux_img))
 
-                    image_data = read_ground_truth(current_directory,images,sorted(aux_img))
-                    final_dic = boundingBox(C,current_directory,image_data)
+                    image_data = utils.read_ground_truth(sorted(aux_img))
+                    final_dic = utils.boundingBox(C,current_directory,image_data)
                     merged_dictionary = merged_dictionary | final_dic #We merge the dictionary each iteration
 
         else:
@@ -296,7 +104,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         print("Este es el diccionario final: ", merged_dictionary)
         print("\n")
     #Now that we have our dictionary with all items we search for train and test images only
-    test_list, train_list, classes_count1, classes_count2, class_mapping = reading_train_test(C,merged_dictionary)
+    test_list, train_list, classes_count1, classes_count2, class_mapping = utils.reading_train_test(C,merged_dictionary)
 
     if C.verbose:
         print(test_list)
@@ -333,7 +141,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     
     #Now we create all anchors
     #print("Este es el all_img_data :", all_img_data)
-    train_data_gen = newSize_augment_anchors.get_anchor_gt(all_img_data, C, get_img_output_length, mode='train')
+    train_data_gen = newSize_augment_anchors.get_anchor_gt(all_img_data, C, utils.get_img_output_length, mode='train')
     X, Y, image_data, debug_img, debug_num_pos = next(train_data_gen)
 
 
@@ -528,10 +336,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         r_epochs += 1
 
         aa = 0 #This is for the final dictionnary all_images, in order to plot the original input image with its corresponding bounding boxes
-
         while True:
             try:
-
                 if len(rpn_accuracy_rpn_monitor) == epoch_length and C.verbose:
                     mean_overlapping_bboxes = float(sum(rpn_accuracy_rpn_monitor))/len(rpn_accuracy_rpn_monitor)
                     rpn_accuracy_rpn_monitor = []
@@ -540,8 +346,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                         print('RPN is not producing bounding boxes that overlap the ground truth boxes. Check RPN settings or keep training.')
 
                 X, Y, img_data, debug_img, debug_num_pos = next(train_data_gen)
-                # Train rpn model and get loss value [_, loss_rpn_cls, loss_rpn_regr]
-                #-------------------A PARTIR DE AQUI TERMINAMOS-----------------------#
+                # Train rpn model and get loss value [_, loss_rpn_cls,loss_rpn_regr]
+                #------------A PARTIR DE AQUI TERMINAMOS------------#
 
                 loss_rpn = model_rpn.train_on_batch(X, Y)
 
@@ -549,10 +355,20 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 P_rpn = model_rpn.predict_on_batch(X)
                 # R: bboxes (shape=(300,4))
                 # Convert rpn layer to roi bboxes
-                #print('Tamaño P_rpn[0] y P_rpn[1]', P_rpn[0].shape,P_rpn[1].shape)
-                #R = rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(), use_regr=True, overlap_thresh=0.7, max_boxes=300)
-                R = rpn_to_roi.rpn_to_roi(P_rpn[0], P_rpn[1], C, K.set_image_data_format('channels_last'), use_regr=True,  max_boxes=50, overlap_thresh=0.4) #Due to an update in keras library, image_dim_ordering() ---> set_image_data_format('channels_last')
-                #Here I make a deep copy of R in order to further convert R's type
+                # print('Tamaño P_rpn[0] y P_rpn[1]', P_rpn[0].shape,P_rpn[1].shape)
+                # R = rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(),
+                # use_regr=True, overlap_thresh=0.7, max_boxes=300)
+                R = rpn_to_roi.rpn_to_roi(P_rpn[0],
+                                          P_rpn[1],
+                                          C,
+                                          K.set_image_data_format('channels_last'),
+                                          use_regr=True,
+                                          max_boxes=50,
+                                          overlap_thresh=0.4)
+    
+                # Due to an update in keras library, image_dim_ordering()--->
+                # set_image_data_format('channels_last')
+                # Here I make a deep copy of R in order to further convert R's type
                 
                 R2 = copy.deepcopy(R) 
                 R2 = R2.tolist()
@@ -575,7 +391,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 #print('ESTE ES EL TIPO DE VARIABLE DE X_prime: ', type(X_prime))
                 #print('CONTENIDO DE X_prime: ', X_prime)
 
-                #----Aqui sacamos los BB del image data para pintar los BB encima de la imágen original-----
+                #----Aqui sacamos los BB del image data para pintar los BB
+                # encima de la imágen original-----
             
                 #print('\nESTE ES EL IMG_DATA por si a caso: ', img_data)
                 #print('ESTE ES EL ALL_IMG_DATA por si a caso: ', all_img_data[aa+1])
@@ -623,14 +440,19 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 plt.title(xi)
                 
                 plt.show()
-                #'channels_last' for tensorflow, 'channels_first' for Theano and 'channels_last' for CNTK (Microsoft Cognitive Toolkit)
+                #'channels_last' for tensorflow, 'channels_first' for Theano
+                # and 'channels_last' for CNTK (Microsoft Cognitive Toolkit)
                 
-                # note: calc_iou converts from (x1,y1,x2,y2) to (x,y,w,h) format
-                # X2: bboxes that iou > C.classifier_min_overlap for all gt bboxes in 300 non_max_suppression bboxes
+                # note: calc_iou converts from (x1,y1,x2,y2) to (x,y,w,h)format
+                # X2: bboxes that iou > C.classifier_min_overlap for all gt
+                # bboxes in 300 non_max_suppression bboxes
                 # Y1: one hot code for bboxes from above => x_roi (X)
                 # Y2: corresponding labels and corresponding gt bboxes
 
-                X2, Y1, Y2, IouS = losses.calc_iou(R, img_data, C, class_mapping)       
+                X2, Y1, Y2, IouS = losses.calc_iou(R,
+                                                   img_data,
+                                                   C,
+                                                   class_mapping)       
 
                 # If X2 is None means there are no matching bboxes
                 if X2 is None:

@@ -119,4 +119,8 @@ C.model_path = output_weight_path
 C.base_net_weights = base_weight_path
 
 #Calling the main to invoke other functions
-funciones.main(C,output_weight_path,record_path,base_weight_path,config_output_filename)
+funciones.main(C,
+               output_weight_path,
+               record_path,
+               base_weight_path,
+               config_output_filename)
