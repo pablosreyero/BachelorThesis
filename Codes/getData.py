@@ -1,3 +1,9 @@
+'''
+This .py file contains the functions that retrieve all the information
+concerning the training and test data sets
+'''
+
+
 from ctypes import sizeof
 import pandas as pd
 import numpy as np 

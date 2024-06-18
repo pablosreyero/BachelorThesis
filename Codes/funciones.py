@@ -418,7 +418,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     plt.imshow(img)
     plt.show()
 
-    
     #-------------------Here we're building the model-----------------------------#
     input_shape_img = (None, None, 3)
 
@@ -624,8 +623,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 plt.title(xi)
                 
                 plt.show()
-            
-                
                 #'channels_last' for tensorflow, 'channels_first' for Theano and 'channels_last' for CNTK (Microsoft Cognitive Toolkit)
                 
                 # note: calc_iou converts from (x1,y1,x2,y2) to (x,y,w,h) format
