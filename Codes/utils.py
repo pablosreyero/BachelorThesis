@@ -96,14 +96,14 @@ def boundingBox(C,current_directory,image_data):
     '''
     We are now retrieving all the information about the BB to plot them.
     Input:
-    - C (python class) this is the configuration class
-    - current_directory (python str) contains the path of the current directory
+    - C (python class) this is the configuration class.
+    - current_directory (python str) contains the path of the current
+    directory.
     - image_data (python dict) contains all the defect's coordinates of each
     training image.
     Output:
     - final_dic (python dict) contains all the information about each training
     image.
-
     '''
 
     image_title = image_data["Titulos"]
@@ -114,7 +114,6 @@ def boundingBox(C,current_directory,image_data):
     y2 = image_data["y2"]
     y2 = [s.rstrip() for s in y2] #in order to remove the \n command at the end
 
-    #CONVERTING FROM FLOAT TO INTEGER
     x1 = [int(float(i)) for i in x1]
     x2 = [int(float(i)) for i in x2]
     y1 = [int(float(i)) for i in y1]
@@ -173,9 +172,20 @@ def boundingBox(C,current_directory,image_data):
         #img.show()
 
     return final_dic
-        #Lo que tengo que hacer es que el codigo lea el archivo .txt  del enlace que me mandó Maria José y segun vaya leyendo las imagenes que ya me dicen, el codigo tiene que saber de que imagen se trata y por ende hacer un dssplay de la información de dicha imagen
+        #Lo que tengo que hacer es que el codigo lea el archivo .txt  del
+        # enlace que me mandó Maria José y segun vaya leyendo las imagenes que
+        # ya me dicen, el codigo tiene que saber de que imagen se trata y por
+        # ende hacer un display de la información de dicha imagen
 
 def reading_train_test (C,final_dic):
+    '''
+    In this file we are going through the training and test images, and we
+    craft a training and testing list.
+
+    Input:
+    - C (python class) this is the configuration class.
+    - final_dict (python dict)
+    '''
 
     train_list = []
     test_list = []
@@ -211,11 +221,6 @@ def reading_train_test (C,final_dic):
                 print('\n')
                 print(image_title_train)
                 print('\n')
-    
-    #Now that we have the titles of both train and test images that will be implemented later on, we proceed by giving the user information about these images
-    if C.verbose:
-        print("Now information of each TEST image will be printed")
-        print('\n')
 
     name_list1 = []
     for iter in final_dic.keys():
@@ -232,7 +237,7 @@ def reading_train_test (C,final_dic):
             test_list.append(test_string)
     
     classes_count1['defects'] = defects_test
-    
+
     print("\n")
     print("Now information of each TRAIN image will be printed")
     print("\n")
@@ -240,8 +245,7 @@ def reading_train_test (C,final_dic):
     name_list2 = []
     for iter in final_dic.keys():
         name_list2.append(iter[59:])
-    
-    
+
     for j in image_title_train:
         if j in name_list2: #MODIFICADO, ANTES: if j in final_dict
             j_prime = os.path.join(route_to_add,j)
@@ -255,10 +259,23 @@ def reading_train_test (C,final_dic):
 
     if 'defects' not in class_mapping:
         class_mapping['defects'] = len(class_mapping)
-    
+
     return test_list, train_list, classes_count1, classes_count2, class_mapping
 
 def get_img_output_length(width, height):
+    '''
+    With this function we are getting both the width and the height from each
+    image
+
+    Inputs:
+    - width (python int)
+    - height (python int)
+
+    Outputs:
+    - width (python int)
+    - height (python int)
+    '''
+
     def get_output_length(input_length):
         return input_length//16
 
