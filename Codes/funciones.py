@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
 import torch
 import torchvision
@@ -31,91 +31,102 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     # get the path/directory
     initial_dir = "/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Castings"
     x = []
-    
+
     for folders in os.listdir(initial_dir):
         x.append(folders)
 
     #Now we sort the extracted folders
     sorted_folders = utils.list_sorting(x)
 
-    #Then, we iterate trough all items inside sorted_folders in order to keep folders that only host images
+    '''Iterate trough all items inside sorted_folders to keep folders that only
+    # host images'''
+
     for j,item in enumerate(sorted_folders):
         if item[0] != "C":
             sorted_folders.pop(j)
-    if C.verbose: print(sorted_folders)
 
     merged_dictionary = {}
     for iter, chose in enumerate(sorted_folders):
         aux_img = []
         current_dir = str(initial_dir + "/" + sorted_folders[iter])
-        os.chdir(current_dir) #Aqui estamos cambiando el directorio en cada iteracion para analizar cada uno de los directorios
-        
+        os.chdir(current_dir) # Change folder in each it to analize all folders
         lista_de_imagenes = [ima for ima in os.listdir(current_dir) if ima.endswith(".png")]
         for images in os.listdir(current_dir):
-            if (images.endswith(".png")):
+            if images.endswith(".png"):
                 aux_img.append(images)
-        
-        #Aqui chequeamos que nos encontramos en el directorio correcto
+
+        # Check if we are at the correct folder
         if C.verbose:
-            print("El directorio en el que te encuentras es el siguiente :", os.getcwd() + "\n")
+            print(f"You are in: {os.getcwd()}")
             print("\n")
 
         buff = []
         for images in os.listdir(current_dir):
-            buff.append(images) #esto me sirve para leer lo que hay en el directorio
+            buff.append(images) # read inside directory
 
-        if ("ground_truth.txt" in buff):
+        if "ground_truth.txt" in buff:
             for images in os.listdir(current_dir):
-                if (images.endswith(".png")):
+                if images.endswith(".png"):
                     aux_img.append(images)
-                if (images == "ground_truth.txt"):
+                if images == "ground_truth.txt":
                     aux_txt.append(images)
                     current_directory = str(os.getcwd())
 
-                    #A la hora de leer las imagenes del directorio C001, me sacaba la imagen 8 repetida, por ello SE ELIMINAN LOS DUPLICADOS EN LA SIGUIENTE LINEA.
+                    # When reading images from C001 dir, image 8 was repeating
+                    # therefore in the following lines we are deleting clones
                     aux_img = list(dict.fromkeys(aux_img))
                     if C.verbose:
                         print("\n")
                         print("Este es el aux_img:" , sorted(aux_img))
 
                     image_data = utils.read_ground_truth(sorted(aux_img))
-                    final_dic = utils.boundingBox(C,current_directory,image_data)
-                    merged_dictionary = merged_dictionary | final_dic #We merge the dictionary each iteration
+                    final_dic = utils.boundingBox(C,current_directory,
+                                                  image_data)
 
+                    #We merge the dictionary each iteration
+                    merged_dictionary = merged_dictionary | final_dic
         else:
             if C.verbose:
-                print("El directorio: " + str(current_dir) + " NO contiene imágenes con defectos")
+                print(f"{str(current_dir)} does not have any deffects")
                 print("\n")
-    if C.verbose:       
+
+    if C.verbose:
         print("\n")
         print("Este es el diccionario final: ", merged_dictionary)
         print("\n")
-    #Now that we have our dictionary with all items we search for train and test images only
-    test_list, train_list, classes_count1, classes_count2, class_mapping = utils.reading_train_test(C,merged_dictionary)
+
+    # Dictionary is ready, NOW search for train and test images only
+    results_reading = utils.reading_train_test(C,merged_dictionary)
+
+    test_lst = results_reading[0]
+    train_lst = results_reading[1]
+    cls_count1 = results_reading[2]
+    cls_count2 = results_reading[3]
+    cls_map = results_reading[4]
 
     if C.verbose:
-        print(test_list)
+        print(test_lst)
         print("\n")
-        print(train_list)
+        print(train_lst)
         print("\n")
-        print("Número de defectos en castings_test.txt", classes_count1)
-        print("Número de defectos en castings_train.txt", classes_count2)
+        print("Número de defectos en castings_test.txt", cls_count1)
+        print("Número de defectos en castings_train.txt", cls_count2)
 
-        print('Esto es class_mappings', class_mapping)
-        print('Esto es class_count2',classes_count2)
+        print('Esto es cls_maps', cls_map)
+        print('Esto es class_count2',cls_count2)
 
-    if 'bg' not in classes_count2:
-        classes_count2['bg'] = 0
-        class_mapping['bg'] = len(class_mapping)
+    if 'bg' not in cls_count2:
+        cls_count2['bg'] = 0
+        cls_map['bg'] = len(cls_map)
 
-    C.class_mapping = class_mapping
+    C.class_mapping = cls_map
 
     if C.verbose:
-        print('Esto es classes_count2: ',classes_count2)
-        print('Esto es class_mapping: ',class_mapping)
+        print('Esto es cls_count2: ',cls_count2)
+        print('Esto es cls_map: ',cls_map)
 
-    #Now that we have all of our data extracted from .txts and images, we proceed by augmenting existing data since we are assuming an overfitting
-    all_img_data = train_list
+    # Data from images extracted! -> NOW augment data (assume overfitting)
+    all_img_data = train_lst
 
     if C.verbose:
         print("Estos son los datos que nos interesan")
@@ -125,7 +136,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     #-------------HERE WE SHUEFFLE THE IMAGES WITH A RANDOM SEED-------------#
     random.seed(5)
     random.shuffle(all_img_data)
-    
+
     #Now we create all anchors
     #print("Este es el all_img_data :", all_img_data)
     train_data_gen = newSize_augment_anchors.get_anchor_gt(all_img_data, C, utils.get_img_output_length, mode='train')
@@ -133,7 +144,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
 
     if C.verbose: print('Esto es el image data',image_data)
-    
+
     #Aqui ya se empieza a pasar los datos de entreno
     if C.verbose:
         print('Original image: height=%d width=%d'%(image_data[1]['h'], image_data[1]['w']))
@@ -161,6 +172,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         plt.grid()
         plt.imshow(img)
         plt.show()
+
     else:
         cls = Y[0][0]
         pos_cls = np.where(cls==1)
@@ -179,7 +191,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         img = debug_img.copy()
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         color = (0, 255, 0)
-        #   cv2.putText(img, 'gt bbox', (gt_x1, gt_y1-5), cv2.FONT_HERSHEY_DUPLEX, 0.7, color, 1)
+        # cv2.putText(img, 'gt bbox', (gt_x1, gt_y1-5), cv2.FONT_HERSHEY_DUPLEX, 0.7, color, 1)
         cv2.rectangle(img, (gt_x1, gt_y1), (gt_x2, gt_y2), color, 2)
         cv2.circle(img, (int((gt_x1+gt_x2)/2), int((gt_y1+gt_y2)/2)), 3, color, -1)
 
@@ -187,6 +199,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         textLabel = 'gt bbox'
         (retval,baseLine) = cv2.getTextSize(textLabel,cv2.FONT_HERSHEY_COMPLEX,0.5,1)
         textOrg = (gt_x1, gt_y1+5)
+
         cv2.rectangle(img, (textOrg[0] - 5, textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (0, 0, 0), 2)
         cv2.rectangle(img, (textOrg[0] - 5,textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (255, 255, 255), -1)
         cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 0, 0), 1)
@@ -205,15 +218,15 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
             cv2.circle(img, center, 3, color, -1)
             anc_w, anc_h = anchor_size*anchor_ratio[0], anchor_size*anchor_ratio[1]
             cv2.rectangle(img, (center[0]-int(anc_w/2), center[1]-int(anc_h/2)), (center[0]+int(anc_w/2), center[1]+int(anc_h/2)), color, 2)
-    #         cv2.putText(img, 'pos anchor bbox '+str(i+1), (center[0]-int(anc_w/2), center[1]-int(anc_h/2)-5), cv2.FONT_HERSHEY_DUPLEX, 0.5, color, 1)
+    # cv2.putText(img, 'pos anchor bbox '+str(i+1), (center[0]-int(anc_w/2), center[1]-int(anc_h/2)-5), cv2.FONT_HERSHEY_DUPLEX, 0.5, color, 1)
 
-    if C.verbose: print('Green bboxes is ground-truth bbox. Others are positive anchors')
+    if C.verbose: print('GREEN bboxes ground-truth. other -> positive anchors')
     plt.figure(figsize=(8,8))
     plt.grid()
     plt.imshow(img)
     plt.show()
 
-    #-------------------Here we're building the model-----------------------------#
+    #-------------------Here we're building the model-------------------#
     input_shape_img = (None, None, 3)
 
     img_input = Input(shape=input_shape_img)
@@ -222,22 +235,26 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     # define the base network (VGG here, can be Resnet50, Inception, etc)
     shared_layers = NNmodel.nn_base(img_input, trainable=True)
 
-    #-----------------------------------------------------------------------------#
     # define the RPN, built on the base layers
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios) # 9
     rpn = layers.rpn_layer(shared_layers, num_anchors)
 
     #-----NUMBER OF CLASSES-----#
-    classifier = layers.classifier_layer(shared_layers, roi_input, C.num_rois, nb_classes=len(classes_count2)) #We only have one class
+    classifier = layers.classifier_layer(shared_layers,
+                                         roi_input,
+                                         C.num_rois,
+                                         nb_classes=len(cls_count2)) 
+                                        # We only have one class
 
     model_rpn = Model(img_input, rpn[:2])
     model_classifier = Model([img_input, roi_input], classifier)
 
-    # this is a model that holds both the RPN and the classifier, used to load/save weights for the models
+    # This holds both the RPN and classifier -> load/save weights for the model
     model_all = Model([img_input, roi_input], rpn[:2] + classifier)
 
-    # Because the google colab can only run the session several hours one time (then you need to connect again), 
-    # we need to save the model and load the model to continue training
+    # Because the google colab can only run the session several hours one time 
+    # (then you need to connect again), we need to save the model and load it
+    # to continue training
     conditional_testing = True
 
     if not os.path.isfile(C.model_path):
@@ -285,8 +302,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
     #-------MODIFICATION-------#
     #Since we only have 1 class, we are passing 1 as the length of the class_count
-    model_classifier.compile(optimizer=optimizer_classifier, loss=[losses.class_loss_cls, losses.class_loss_regr(len(classes_count2)-1)], metrics={'dense_class_{}'.format(len(classes_count2)): 'accuracy'})
-    #model_classifier.compile(optimizer=optimizer_classifier, loss=[losses.class_loss_cls, losses.class_loss_regr(classes_count2-1)], metrics={'dense_class_{}'.format(classes_count): 'accuracy'})
+    model_classifier.compile(optimizer=optimizer_classifier, loss=[losses.class_loss_cls, losses.class_loss_regr(len(cls_count2)-1)], metrics={'dense_class_{}'.format(len(cls_count2)): 'accuracy'})
+    #model_classifier.compile(optimizer=optimizer_classifier, loss=[losses.class_loss_cls, losses.class_loss_regr(cls_count2-1)], metrics={'dense_class_{}'.format(classes_count): 'accuracy'})
     model_all.compile(optimizer='sgd', loss='mae')
 
 #-------------------- TRAINING SETTING --------------------# 
@@ -296,7 +313,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     epoch_length = 150 #1000
     num_epochs = 90
     iter_num = 0
-
     total_epochs += num_epochs
 
     losses_value = np.zeros((epoch_length, 5))
@@ -307,7 +323,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         best_loss = np.Inf
     else:
         best_loss = np.min(r_curr_loss)       
-    
+
     #print('length of record_df: ',len(record_df)) #result of print -> 0!
 #-------------------- HERE WE'RE DELETING THE FIRST ENTRY IN THE OLD DICTIONNARY---------------
 #------Becasue, the debug image is the first one in the list of dictionnaries, so if we want to compare the original input image with the result image, we have to avoid
@@ -439,7 +455,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 X2, Y1, Y2, IouS = losses.calc_iou(R,
                                                    img_data,
                                                    C,
-                                                   class_mapping)       
+                                                   cls_map)       
 
                 # If X2 is None means there are no matching bboxes
                 if X2 is None:
