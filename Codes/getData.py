@@ -3,25 +3,6 @@ This .py file contains the functions that retrieve all the information
 concerning the training and test data sets
 '''
 
-
-from ctypes import sizeof
-import pandas as pd
-import numpy as np 
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from PIL import Image
-import torch
-import torchvision
-from torchvision.io import read_image
-from torchvision.utils import draw_bounding_boxes
-import os
-from os import listdir
-import tensorflow as tf
-import pathlib as Path
-import imghdr
-from collections import defaultdict
-from copy import deepcopy 
-import json
 import sys
 import cv2
 
