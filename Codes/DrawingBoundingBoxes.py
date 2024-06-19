@@ -1,27 +1,8 @@
-from ctypes import sizeof
-import pandas as pd
-import numpy as np 
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from PIL import Image
-import torch
-import torchvision
-from torchvision.io import read_image
-from torchvision.utils import draw_bounding_boxes
-import os
-from os import listdir
 import tensorflow as tf
-import pathlib as Path
-import imghdr
-from collections import defaultdict
-import json
-import sys
 import math
-
 
 #Here we're importing all project functions
 import funciones
-import newSize_augment_anchors
 
 
 #Avoid the use of all MEM
@@ -30,7 +11,7 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 
-#Here we define the configuration class we will use in order to manage data correctly
+# Here we define the configuration class
 class configuration:
 
     def __init__(self):
@@ -48,13 +29,16 @@ class configuration:
             self.rot_90 = False
 
             # Anchor box scales
-            # Note that if im_size is smaller, anchor_box_scales should be scaled
+            # If im_size is smaller, anchor_box_scales should be scaled
             # Original anchor_box_scales in the paper is [128, 256, 512]
             
             self.anchor_box_scales = [16, 32, 64] #this is must to achieve multiscale detection
 
             # Anchor box ratios
-            self.anchor_box_ratios = [[1, 1], [1./math.sqrt(2), 2./math.sqrt(2)], [2./math.sqrt(2), 1./math.sqrt(2)]] # this ratios are not OK
+            self.anchor_box_ratios = [[1, 1],
+                                      [1./math.sqrt(2),2./math.sqrt(2)],
+                                      [2./math.sqrt(2), 1./math.sqrt(2)]]
+            # this ratios are not OK
 
             # Size to resize the smallest side of the image
             # Original setting in paper is 600. Set to 300 in here to save training time
