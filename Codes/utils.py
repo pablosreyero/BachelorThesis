@@ -3,44 +3,13 @@ This file contains all the utility functions, used when retrieving ground truth
 data and information about some image properties
 '''
 
-from ctypes import sizeof
-import pandas as pd
-import numpy as np 
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+
 from PIL import Image
 import torch
 import torchvision
 from torchvision.io import read_image
 from torchvision.utils import draw_bounding_boxes
-import torchvision.transforms.functional as fn
-import math as mt
 import os
-from os import listdir
-import tensorflow as tf
-import pathlib as Path
-import imghdr
-from collections import defaultdict
-from copy import deepcopy
-import json
-import sys
-import cv2
-from keras.layers import Input
-from keras.models import Model
-from keras.utils import generic_utils
-from keras.optimizers import Adam
-from keras import backend as K
-import time
-import random
-import copy
-
-# Here we import the used functions
-import newSize_augment_anchors
-import NNmodel
-import layers
-import losses
-import rpn_to_roi
-import traceback
 
 
 def list_sorting(item):
