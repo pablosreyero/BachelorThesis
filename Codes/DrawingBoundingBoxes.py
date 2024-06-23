@@ -12,7 +12,7 @@ for gpu in gpus:
 
 
 # Here we define the configuration class
-class configuration:
+class config:
 
     def __init__(self):
                 
@@ -74,7 +74,10 @@ class configuration:
 
             self.model_path = None
 
-#Paths
+
+    def get_variables(self):
+         return vars(self) 
+
 
 #base_path = ''
 #train_path =  ''
@@ -91,7 +94,7 @@ vertical_flips = True
 rot_90 = True
 
 #Now we create the associated objects of the upper class
-C = configuration()
+C = config()
 
 C.use_horizontal_flips = horizontal_flips
 C.use_vertical_flips = vertical_flips
@@ -101,6 +104,13 @@ C.num_rois = num_rois
 C.record_path = record_path
 C.model_path = output_weight_path
 C.base_net_weights = base_weight_path
+
+# let's print our variables
+print("\n|-----------< CONFIG VARIABLES >-----------\n|")
+variables = vars(C)
+for key, value in variables.items():
+     print(f"|----> {key}: {value}")
+print("\n")
 
 #Calling the main to invoke other functions
 funciones.main(C,

@@ -46,11 +46,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
             sorted_folders.pop(j)
 
     merged_dictionary = {}
-    for iter, chose in enumerate(sorted_folders):
+    for iter, _ in enumerate(sorted_folders):
         aux_img = []
         current_dir = str(initial_dir + "/" + sorted_folders[iter])
         os.chdir(current_dir) # Change folder in each it to analize all folders
-        lista_de_imagenes = [ima for ima in os.listdir(current_dir) if ima.endswith(".png")]
+        # lista_de_imagenes = [ima for ima in os.listdir(current_dir) if ima.endswith(".png")]
         for images in os.listdir(current_dir):
             if images.endswith(".png"):
                 aux_img.append(images)
@@ -83,7 +83,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     final_dic = utils.boundingBox(C,current_directory,
                                                   image_data)
 
-                    #We merge the dictionary each iteration
+                    # We merge the dictionary each iteration
                     merged_dictionary = merged_dictionary | final_dic
         else:
             if C.verbose:

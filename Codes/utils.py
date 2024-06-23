@@ -105,7 +105,11 @@ def boundingBox(C,current_directory,image_data):
                 image_path = os.path.join(current_directory,title)
                 data_image1 = Image.open(image_path)
                 if title in titlesn:
-                    final_dic[image_path]['boxes'].append({'class': 'defects' , 'x1': int(x1[iter]),'y1': int(y1[iter]),'x2': int(x2[iter]),'y2': int(y2[iter])}) #CAMBIAR TITLE por IMAGE_PATH URGENTEEEEEEEEEE
+                    final_dic[image_path]['boxes'].append({'class': 'defects',
+                                                           'x1': int(x1[iter]),
+                                                           'y1': int(y1[iter]),
+                                                           'x2': int(x2[iter]),
+                                                           'y2': int(y2[iter])})
                 else:
                     titlesn.append(title) #dejar la ruta desde castings
                     final_dic[image_path] = {'w': data_image1.width,
@@ -126,7 +130,8 @@ def boundingBox(C,current_directory,image_data):
     for keys, stuff in final_dic.items(): #Para el append de los directorios puedo utilizar la funcion join: os.path.join
         #print(keys,stuff)
 
-        #image_path = os.path.join(current_directory,keys) #Esta linea es muy importante
+        #Esta linea es muy importante
+        #image_path = os.path.join(current_directory,keys)
         #print("\n")
         img = read_image(keys)
         box = []
