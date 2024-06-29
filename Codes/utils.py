@@ -3,7 +3,9 @@ This file contains all the utility functions, used when retrieving ground truth
 data and information about some image properties
 '''
 
-
+import cv2
+import glob
+import numpy as np
 from PIL import Image
 import torch
 import torchvision
@@ -261,4 +263,34 @@ def get_img_output_length(width, height):
     def get_output_length(input_length):
         return input_length//16
 
-    return get_output_length(width), get_output_length(height)  
+    return get_output_length(width), get_output_length(height)
+
+
+def calculate_channel_means(image_paths):
+    """
+    This function takes as an input all the images paths, and returns the total
+    img_channel_mean computed from each image in the training set.
+    """
+
+    # Initialize sums for each channel
+    sum_r, sum_g, sum_b = 0, 0, 0
+    num_pixels = 0
+
+    for image_path in image_paths:
+        img = cv2.imread(image_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+        sum_r += np.sum(img[:, :, 0])
+        sum_g += np.sum(img[:, :, 1])
+        sum_b += np.sum(img[:, :, 2])
+        num_pixels += img.shape[0] * img.shape[1]
+
+    mean_r = sum_r / num_pixels
+    mean_g = sum_g / num_pixels
+    mean_b = sum_b / num_pixels
+
+    return [mean_r, mean_g, mean_b]
+
+# Replace with the path to your dataset images
+image_paths = glob.glob('path_to_your_dataset/*.jpg')  # Adjust the path and extension as needed
+img_channel_mean = calculate_channel_means(image_paths)
+print("Channel means:", img_channel_mean)
