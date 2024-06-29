@@ -88,7 +88,7 @@ base_weight_path = '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/M
 config_output_filename = '/Users/pablosreyero/Documents/Universidad/TFG/tfg-psr/data/Model/model_vgg_config.pickle'
 num_rois = 4
 
-#Data augmentation profile
+#Data augmentation profile 
 horizontal_flips = True
 vertical_flips = True 
 rot_90 = True

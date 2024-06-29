@@ -200,24 +200,44 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         (retval,baseLine) = cv2.getTextSize(textLabel,cv2.FONT_HERSHEY_COMPLEX,0.5,1)
         textOrg = (gt_x1, gt_y1+5)
 
-        cv2.rectangle(img, (textOrg[0] - 5, textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (0, 0, 0), 2)
-        cv2.rectangle(img, (textOrg[0] - 5,textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (255, 255, 255), -1)
-        cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 0, 0), 1)
+        cv2.rectangle(img,
+                      (textOrg[0] - 5,
+                       textOrg[1]+baseLine - 5),
+                       (textOrg[0]+retval[0] + 5,
+                        textOrg[1]-retval[1] - 5),
+                        (0, 0, 0), 2)
+
+        cv2.rectangle(img,
+                      (textOrg[0] - 5,
+                       textOrg[1]+baseLine - 5),
+                       (textOrg[0]+retval[0] + 5,
+                        textOrg[1]-retval[1] - 5),
+                        (255, 255, 255), -1)
+
+        cv2.putText(img,
+                    textLabel,
+                    textOrg,
+                    cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 0, 0), 1)
 
         # Draw positive anchors according to the y_rpn_regr
         for i in range(debug_num_pos):
-
             color = (100+i*(155/4), 0, 100+i*(155/4))
-
             idx = pos_regr[2][i*4]/4
             anchor_size = C.anchor_box_scales[int(idx/3)]
             anchor_ratio = C.anchor_box_ratios[2-int((idx+1)%3)]
+            center = (pos_regr[1][i*4]*C.rpn_stride,
+                      pos_regr[0][i*4]*C.rpn_stride)
 
-            center = (pos_regr[1][i*4]*C.rpn_stride, pos_regr[0][i*4]*C.rpn_stride)
             if C.verbose: print('Center position of positive anchor: ', center)
             cv2.circle(img, center, 3, color, -1)
-            anc_w, anc_h = anchor_size*anchor_ratio[0], anchor_size*anchor_ratio[1]
-            cv2.rectangle(img, (center[0]-int(anc_w/2), center[1]-int(anc_h/2)), (center[0]+int(anc_w/2), center[1]+int(anc_h/2)), color, 2)
+            anc_w, anc_h = anchor_size*anchor_ratio[0],anchor_size*anchor_ratio[1]
+            cv2.rectangle(img,
+                          (center[0]-int(anc_w/2),
+                           center[1]-int(anc_h/2)),
+                           (center[0]+int(anc_w/2),
+                            center[1]+int(anc_h/2)),
+                            color,
+                            2)
     # cv2.putText(img, 'pos anchor bbox '+str(i+1), (center[0]-int(anc_w/2), center[1]-int(anc_h/2)-5), cv2.FONT_HERSHEY_DUPLEX, 0.5, color, 1)
 
     if C.verbose: print('GREEN bboxes ground-truth. other -> positive anchors')
@@ -298,11 +318,16 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 #-------------------- SECOND PART OF THE TRAINING --------------------#
     optimizer = Adam(lr=1e-5)
     optimizer_classifier = Adam(lr=1e-5)
-    model_rpn.compile(optimizer=optimizer, loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors)])
+    model_rpn.compile(optimizer=optimizer,
+                      loss=[losses.rpn_loss_cls(num_anchors),
+                            losses.rpn_loss_regr(num_anchors)])
 
     #-------MODIFICATION-------#
     #Since we only have 1 class, we are passing 1 as the length of the class_count
-    model_classifier.compile(optimizer=optimizer_classifier, loss=[losses.class_loss_cls, losses.class_loss_regr(len(cls_count2)-1)], metrics={'dense_class_{}'.format(len(cls_count2)): 'accuracy'})
+    model_classifier.compile(optimizer=optimizer_classifier,
+                             loss=[losses.class_loss_cls,
+                                   losses.class_loss_regr(len(cls_count2)-1)],
+                                   metrics={'dense_class_{}'.format(len(cls_count2)): 'accuracy'})
     #model_classifier.compile(optimizer=optimizer_classifier, loss=[losses.class_loss_cls, losses.class_loss_regr(cls_count2-1)], metrics={'dense_class_{}'.format(classes_count): 'accuracy'})
     model_all.compile(optimizer='sgd', loss='mae')
 
@@ -413,7 +438,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 #print('Esta es la imagen que estamos leyendo: ',all_img_data[aa+1][0])
                 aa+=1
                 boxBB2 = torch.tensor(boxBB2, dtype=torch.int)
-                img = draw_bounding_boxes(img, boxBB2, width=1, colors='red', fill=True)
+                img = draw_bounding_boxes(img,
+                                          boxBB2,
+                                          width=1,
+                                          colors='red',
+                                          fill=True)
                                     
                 # transform this image to PIL image
                 img = torchvision.transforms.ToPILImage()(img)
@@ -430,8 +459,13 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 for j in R2:
                     if j not in boxx:
                         boxx.append(j)
-                        cv2.rectangle(imagex, (j[0],j[1]), (j[0]+j[2], j[1]+j[3]), color, 2)
-        
+                        cv2.rectangle(imagex,
+                                      (j[0],
+                                       j[1]),
+                                       (j[0]+j[2],
+                                        j[1]+j[3]),
+                                        color,
+                                        2)
 
                 rows, cols = 1, 2
                 plt.subplot(rows, cols, 1)
@@ -452,10 +486,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 # Y1: one hot code for bboxes from above => x_roi (X)
                 # Y2: corresponding labels and corresponding gt bboxes
 
-                X2, Y1, Y2, IouS = losses.calc_iou(R,
-                                                   img_data,
-                                                   C,
-                                                   cls_map)       
+                X2, Y1, Y2, IouS = losses.calc_iou(R, img_data, C, cls_map)       
 
                 # If X2 is None means there are no matching bboxes
                 if X2 is None:
@@ -486,7 +517,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     if len(pos_samples) < C.num_rois//2:
                         selected_pos_samples = pos_samples.tolist()
                     else:
-                        selected_pos_samples = np.random.choice(pos_samples, C.num_rois//2, replace=False).tolist()
+                        selected_pos_samples = np.random.choice(pos_samples,C.num_rois//2, replace=False).tolist()
                     
                     # Randomly choose (num_rois - num_pos) neg samples
                     try:
