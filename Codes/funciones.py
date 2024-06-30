@@ -56,9 +56,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 aux_img.append(images)
 
         # Check if we are at the correct folder
-        if C.verbose:
-            print(f"You are in: {os.getcwd()}")
-            print("\n")
+        if C.verbose: print(f"You are in: {os.getcwd()}\n")
 
         buff = []
         for images in os.listdir(current_dir):
@@ -76,8 +74,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     # therefore in the following lines we are deleting clones
                     aux_img = list(dict.fromkeys(aux_img))
                     if C.verbose:
-                        print("\n")
-                        print("Este es el aux_img:" , sorted(aux_img))
+                        print(f"Este es el aux_img: {sorted(aux_img)}")
 
                     image_data = utils.read_ground_truth(sorted(aux_img))
                     final_dic = utils.boundingBox(C,current_directory,
@@ -86,14 +83,9 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     # We merge the dictionary each iteration
                     merged_dictionary = merged_dictionary | final_dic
         else:
-            if C.verbose:
-                print(f"{str(current_dir)} does not have any deffects")
-                print("\n")
+            if C.verbose: print(f"{str(current_dir)} has NO deffects\n")
 
-    if C.verbose:
-        print("\n")
-        print("Este es el diccionario final: ", merged_dictionary)
-        print("\n")
+    if C.verbose: print(f"\nfinal DICT: {merged_dictionary}\n")
 
     # Dictionary is ready, NOW search for train and test images only
     results_reading = utils.reading_train_test(C,merged_dictionary)
@@ -104,16 +96,12 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     cls_count2 = results_reading[3]
     cls_map = results_reading[4]
 
-    if C.verbose:
-        print(test_lst)
-        print("\n")
-        print(train_lst)
-        print("\n")
-        print("Número de defectos en castings_test.txt", cls_count1)
-        print("Número de defectos en castings_train.txt", cls_count2)
-
-        print('Esto es cls_maps', cls_map)
-        print('Esto es class_count2',cls_count2)
+    if C.verbose: print(f"\n{test_lst}\n")
+    if C.verbose: print(f"\n{train_lst}\n")
+    if C.verbose: print("Número de defectos en castings_test.txt", cls_count1)
+    if C.verbose: print("Número de defectos en castings_train.txt", cls_count2)
+    if C.verbose: print('Esto es cls_maps', cls_map)
+    if C.verbose: print('Esto es class_count2',cls_count2)
 
     if 'bg' not in cls_count2:
         cls_count2['bg'] = 0
@@ -121,17 +109,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
     C.class_mapping = cls_map
 
-    if C.verbose:
-        print('Esto es cls_count2: ',cls_count2)
-        print('Esto es cls_map: ',cls_map)
+    if C.verbose: print(f'This is cls_count2: {cls_count2}')
+    if C.verbose: print(f'Esto es cls_map: {cls_map}')
 
     # Data from images extracted! -> NOW augment data (assume overfitting)
     all_img_data = train_lst
-
-    if C.verbose:
-        print("Estos son los datos que nos interesan")
-        print("\n")
-        #print(all_img_data)
 
     #-------------HERE WE SHUEFFLE THE IMAGES WITH A RANDOM SEED-------------#
     random.seed(5)
@@ -147,9 +129,14 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
     #Aqui ya se empieza a pasar los datos de entreno
     if C.verbose:
-        print('Original image: height=%d width=%d'%(image_data[1]['h'], image_data[1]['w']))
-        print('Resized image:  height=%d width=%d C.im_size=%d'%(X.shape[1], X.shape[2], C.im_size))
-        print('Feature map size: height=%d width=%d C.rpn_stride=%d'%(Y[0].shape[1], Y[0].shape[2], C.rpn_stride))
+        print('Original image: height=%d width=%d'%(image_data[1]['h'],
+                                                    image_data[1]['w']))
+        print('Resized image:  height=%d width=%d C.im_size=%d'%(X.shape[1],
+                                                                 X.shape[2],
+                                                                 C.im_size))
+        print('Feature map size: height=%d width=%d C.rpn_stride=%d'%(Y[0].shape[1],
+                                                                      Y[0].shape[2],
+                                                                      C.rpn_stride))
         print(X.shape)
         print(str(len(Y))+" includes 'y_rpn_cls' and 'y_rpn_regr'")
         print('Shape of y_rpn_cls {}'.format(Y[0].shape))
@@ -160,14 +147,29 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     if debug_num_pos==0:
         gt_x1, gt_x2 = image_data[1]['boxes'][0][0]*(X.shape[2]/image_data[1]['h']), image_data[1]['boxes'][0][2]*(X.shape[2]/image_data[1]['h'])
         gt_y1, gt_y2 = image_data[1]['boxes'][0][1]*(X.shape[1]/image_data[1]['w']), image_data[1]['boxes'][0][3]*(X.shape[1]/image_data[1]['w'])
-        gt_x1, gt_y1, gt_x2, gt_y2 = int(gt_x1), int(gt_y1), int(gt_x2), int(gt_y2)
+        gt_x1,gt_y1, gt_x2, gt_y2 = int(gt_x1),int(gt_y1),int(gt_x2),int(gt_y2)
 
         img = debug_img.copy()
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         color = (0, 255, 0)
-        cv2.putText(img, 'gt bbox', (gt_x1, gt_y1-5), cv2.FONT_HERSHEY_DUPLEX, 0.7, color, 1)
-        cv2.rectangle(img, (gt_x1, gt_y1), (gt_x2, gt_y2), color, 2)
-        cv2.circle(img, (int((gt_x1+gt_x2)/2), int((gt_y1+gt_y2)/2)), 3, color, -1)
+
+        cv2.putText(img,
+                    'gt bbox',
+                    (gt_x1, gt_y1-5),
+                    cv2.FONT_HERSHEY_DUPLEX,
+                    0.7,
+                    color,
+                    1)
+        cv2.rectangle(img,
+                      (gt_x1, gt_y1),
+                      (gt_x2, gt_y2),
+                      color,
+                      2)
+        cv2.circle(img,
+                   (int((gt_x1+gt_x2)/2),int((gt_y1+gt_y2)/2)),
+                   3,
+                   color,
+                   -1)
 
         plt.grid()
         plt.imshow(img)
@@ -192,8 +194,17 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         color = (0, 255, 0)
         # cv2.putText(img, 'gt bbox', (gt_x1, gt_y1-5), cv2.FONT_HERSHEY_DUPLEX, 0.7, color, 1)
-        cv2.rectangle(img, (gt_x1, gt_y1), (gt_x2, gt_y2), color, 2)
-        cv2.circle(img, (int((gt_x1+gt_x2)/2), int((gt_y1+gt_y2)/2)), 3, color, -1)
+        cv2.rectangle(img,
+                      (gt_x1, gt_y1),
+                      (gt_x2, gt_y2),
+                      color,
+                      2)
+        cv2.circle(img,
+                   (int((gt_x1+gt_x2)/2),
+                    int((gt_y1+gt_y2)/2)),
+                    3,
+                    color,
+                    -1)
 
         # Add text
         textLabel = 'gt bbox'
@@ -206,14 +217,12 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                        (textOrg[0]+retval[0] + 5,
                         textOrg[1]-retval[1] - 5),
                         (0, 0, 0), 2)
-
         cv2.rectangle(img,
                       (textOrg[0] - 5,
                        textOrg[1]+baseLine - 5),
                        (textOrg[0]+retval[0] + 5,
                         textOrg[1]-retval[1] - 5),
                         (255, 255, 255), -1)
-
         cv2.putText(img,
                     textLabel,
                     textOrg,
@@ -239,7 +248,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                             color,
                             2)
     # cv2.putText(img, 'pos anchor bbox '+str(i+1), (center[0]-int(anc_w/2), center[1]-int(anc_h/2)-5), cv2.FONT_HERSHEY_DUPLEX, 0.5, color, 1)
-
     if C.verbose: print('GREEN bboxes ground-truth. other -> positive anchors')
     plt.figure(figsize=(8,8))
     plt.grid()

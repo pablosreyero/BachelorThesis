@@ -12,6 +12,7 @@ import torchvision
 from torchvision.io import read_image
 from torchvision.utils import draw_bounding_boxes
 import os
+import copy
 
 
 def list_sorting(item):
@@ -121,12 +122,7 @@ def boundingBox(C,current_directory,image_data):
                                                         'y1': int(y1[iter]),
                                                         'x2': int(x2[iter]),
                                                         'y2': int(y2[iter])}]} 
-                    #Añadir un diccionario en title 
-                    #Aqui en vez de poner el titulo de cada imagen estamos poniendo la ruta de cada imagen
-    if C.verbose:
-        print("\n")
-        print(final_dic)
-        print("\n")
+    if C.verbose: print(f"\n{final_dic}\n")
 
     #Ahora pintamos 
     for keys, stuff in final_dic.items(): #Para el append de los directorios puedo utilizar la funcion join: os.path.join
@@ -196,6 +192,7 @@ def reading_train_test (C,final_dic):
                 print('\n')
                 print(image_title_test)
                 print('\n')
+
         if fichiers == ('castings_train.txt'):
             image_title_train = [x for x in open('castings_train.txt').readlines()] #Aqui estamos recorriendo el archivo, MODIFICADO: image_title_train = [os.path.basename(x) for x in open('castings_train.txt').readlines()]
             image_title_train = [s.rstrip() for s in image_title_train] #Aqui le estamos quitando el simbolo de salto de linea \n
@@ -222,9 +219,7 @@ def reading_train_test (C,final_dic):
             test_list.append(test_string)
 
     classes_count1['defects'] = defects_test
-    print("\n")
-    print("Now information of each TRAIN image will be printed")
-    print("\n")
+    if C.verbose: print("\nNow information of each TRAIN image is printed\n")
 
     name_list2 = []
     for iter in final_dic.keys():
@@ -290,7 +285,125 @@ def calculate_channel_means(image_paths):
 
     return [mean_r, mean_g, mean_b]
 
-# Replace with the path to your dataset images
-image_paths = glob.glob('path_to_your_dataset/*.jpg')  # Adjust the path and extension as needed
-img_channel_mean = calculate_channel_means(image_paths)
-print("Channel means:", img_channel_mean)
+
+def get_new_img_size(width, height, img_min_side=300):
+	#print('Hemos entrado en get_new_image_size')
+	if width <= height:
+		
+		f = float(img_min_side) / width
+		resized_height = int(f * height)
+		resized_width = img_min_side
+		"""
+		resized_height = 400
+		resized_width = 288
+		"""
+	else:
+		
+		f = float(img_min_side) / height
+		resized_width = int(f * width)
+		resized_height = img_min_side
+		"""
+		resized_height = 288
+		resized_width = 400
+		"""
+	return resized_width, resized_height
+
+
+def augment(img_data, config, augment=True):
+	#assert 'filepath' in img_data
+	assert 'boxes' in img_data[1]
+	assert 'w' in img_data[1]
+	assert 'h' in img_data[1]
+	#print('FIRSTLY WE PRINT image_data: ',img_data)
+	img_data_aug = copy.deepcopy(img_data)
+	 
+	img = cv2.imread(img_data[0]) #We have the PATH in the 1st position of the list
+	#print('Dimensions of the original image',img.shape)
+
+	if augment:
+		rows, cols = img.shape[:2] #Preguntar a Maria José que está haciendo aqui
+		if config.use_horizontal_flips and np.random.randint(0, 2) == 0: #Aqui estamos rotando las imagenes o haciendo cambios, segun el cambio que se quiera hacer se ha de especificar en el archivo de configuracion
+			img = cv2.flip(img, 1)
+			for bbox in img_data_aug[1]['boxes']:
+				x1 = bbox['x1'] #x1 is in the position 0
+				x2 = bbox['x2'] #x2 is in the position 2
+				bbox['x2'] = cols - x1
+				bbox['x1'] = cols - x2
+
+		if config.use_vertical_flips and np.random.randint(0, 2) == 0:
+			img = cv2.flip(img, 0)
+			for bbox in img_data_aug[1]['boxes']:
+				y1 = bbox['y1'] #y1 is in the position 1 
+				y2 = bbox['y2'] #y2 is in the position 3 
+			bbox['y2'] = rows - y1
+			bbox['y1'] = rows - y2
+
+		if config.rot_90:
+			angle = np.random.choice([0,90,180,270],1)[0]
+			if angle == 270:
+				img = np.transpose(img, (1,0,2))
+				img = cv2.flip(img, 0)
+			elif angle == 180:
+				img = cv2.flip(img, -1)
+			elif angle == 90:
+				img = np.transpose(img, (1,0,2))
+				img = cv2.flip(img, 1)
+			elif angle == 0:
+				pass
+
+			for bbox in img_data_aug[1]['boxes']:
+				x1 = bbox['x1']
+				x2 = bbox['x2']
+				y1 = bbox['y1']
+				y2 = bbox['y2']
+				if angle == 270:
+					bbox['x1'] = y1
+					bbox['x2'] = y2
+					bbox['y1'] = cols - x2
+					bbox['y2'] = cols - x1
+				elif angle == 180:
+					bbox['x2'] = cols - x1
+					bbox['x1'] = cols - x2
+					bbox['y2'] = rows - y1
+					bbox['y1'] = rows - y2
+				elif angle == 90:
+					bbox['x1'] = rows - y2
+					bbox['x2'] = rows - y1
+					bbox['y1'] = x1
+					bbox['y2'] = x2        
+				elif angle == 0:
+					pass
+
+	img_data_aug[1]['w'] = img.shape[1] #Estas dos lineas me las comentó y yo las he descomentado de nuevo
+	img_data_aug[1]['h'] = img.shape[0]
+
+	#plt.imshow(img)
+	#plt.title("Modified image")
+	#plt.show()
+
+	"""
+	#Ahora, para asegurarnos de que nos está modificando correctamente las imágenes, las ploteamos con los BB
+	box = []
+	for j in img_data_aug[1]['boxes']:
+		if j not in box:
+			box.append(j)
+	#print(box)
+	#img2 = torch.tensor(img, dtype=torch.uint8)
+	box = torch.tensor(box, dtype=torch.int)
+
+	img_prime = torch.from_numpy(img) #En este paso estamos convirtiendo el np.array a tensor
+	img_prime = torch.permute(img_prime, (2, 0, 1)) #Esto es para que cunado la función de bounding boxes se lea primero el número de canales.
+	#print('Dimensions of the images tensor',img_prime.size())
+	#print('\n')
+	img2 = draw_bounding_boxes(img_prime, box, width=1, colors="red", fill=True)
+	
+	# transform this image to PIL image
+	img2 = torchvision.transforms.ToPILImage()(img2)
+    # display output
+
+	#plt.imshow(img2)
+	#plt.title("Modified image with bounding boxes")
+	#plt.show()
+	"""
+
+	return img_data_aug, img
