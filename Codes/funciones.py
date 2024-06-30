@@ -17,7 +17,7 @@ import random
 import copy
 
 #Here we import the used functions
-import newSize_augment_anchors
+from rpn_computation import get_anchor_gt
 import NNmodel
 import layers
 import losses
@@ -121,7 +121,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
     #Now we create all anchors
     #print("Este es el all_img_data :", all_img_data)
-    train_data_gen = newSize_augment_anchors.get_anchor_gt(all_img_data, C, utils.get_img_output_length, mode='train')
+    train_data_gen = get_anchor_gt(all_img_data,
+                                   C,
+                                   utils.get_img_output_length,
+                                   mode='train')
+
     X, Y, image_data, debug_img, debug_num_pos = next(train_data_gen)
 
 
