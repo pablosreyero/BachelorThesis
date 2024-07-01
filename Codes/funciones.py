@@ -120,7 +120,16 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     random.shuffle(all_img_data)
 
     #Now we create all anchors
-    #print("Este es el all_img_data :", all_img_data)
+    print('#########################')
+    print("Este es el all_img_data :", all_img_data)
+
+    # now let us compute all channel_means form all images
+
+    print("Computing channel means of all images")
+    channel_means = utils.calculate_channel_means(all_img_data)
+    C.img_channel_mean = channel_means
+    print(f"The dictionary has {len(all_img_data)}entries")
+
     train_data_gen = get_anchor_gt(all_img_data,
                                    C,
                                    utils.get_img_output_length,

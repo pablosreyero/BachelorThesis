@@ -6,7 +6,7 @@ from keras import backend as K
 
 #------------HERE WE'RE IMPORTING EXTERNAL FUNCTIONS------------#
 import intersection_over_union
-import newSize_augment_anchors
+from utils import get_new_img_size
 
 lambda_rpn_regr = 1.0
 lambda_rpn_class = 1.0
@@ -233,7 +233,7 @@ def calc_iou(R, img_data, C, class_mapping):
     bboxes = img_data[1]['boxes'] #Get all bounding boxes for every single image
     (width, height) = (img_data[1]['w'], img_data[1]['h'])
     # get image dimensions for resizing
-    (resized_width, resized_height) = newSize_augment_anchors.get_new_img_size(width, height, C.im_size)
+    (resized_width, resized_height) = get_new_img_size(width, height, C.im_size)
     gta = np.zeros((len(bboxes), 4))
 
     

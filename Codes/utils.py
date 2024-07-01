@@ -261,7 +261,7 @@ def get_img_output_length(width, height):
     return get_output_length(width), get_output_length(height)
 
 
-def calculate_channel_means(image_paths):
+def calculate_channel_means(all_image_data):
     """
     This function takes as an input all the images paths, and returns the total
     img_channel_mean computed from each image in the training set.
@@ -270,18 +270,20 @@ def calculate_channel_means(image_paths):
     # Initialize sums for each channel
     sum_r, sum_g, sum_b = 0, 0, 0
     num_pixels = 0
-
-    for image_path in image_paths:
-        img = cv2.imread(image_path)
+    count = 0
+    for image_path in all_image_data:
+        img = cv2.imread(image_path[0])
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
         sum_r += np.sum(img[:, :, 0])
         sum_g += np.sum(img[:, :, 1])
         sum_b += np.sum(img[:, :, 2])
         num_pixels += img.shape[0] * img.shape[1]
+        count += 1
 
     mean_r = sum_r / num_pixels
     mean_g = sum_g / num_pixels
     mean_b = sum_b / num_pixels
+    print(f"{count} analysed images and computed means")
 
     return [mean_r, mean_g, mean_b]
 

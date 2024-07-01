@@ -272,9 +272,7 @@ def get_anchor_gt(all_img_data, C, img_length_calc_function, mode='train'):
 				debug_img = x_img.copy()
 		
 				try:
-					y_rpn_cls,
-					y_rpn_regr,
-					num_pos = calc_rpn(C,img_data_aug,width,height,resized_width,resized_height,img_length_calc_function)
+					y_rpn_cls, y_rpn_regr, num_pos = calc_rpn(C,img_data_aug,width,height,resized_width,resized_height,img_length_calc_function)
 
 				except:
 					print('This is the one')
