@@ -128,6 +128,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     print("Computing channel means of all images")
     channel_means = utils.calculate_channel_means(all_img_data)
     C.img_channel_mean = channel_means
+    print(f"--------------This is the channel_mean result: {C.img_channel_mean}--------------")
     print(f"The dictionary has {len(all_img_data)}entries")
 
     train_data_gen = get_anchor_gt(all_img_data,

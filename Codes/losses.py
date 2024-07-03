@@ -82,7 +82,6 @@ def class_loss_cls(y_true, y_pred):
     #return lambda_cls_class * K.mean(categorical_crossentropy(y_true[0, :, :], y_pred[0, :, :]))
     
 #------------------NON_MAX_SUPPRESSION_FAST------------------#
-
 def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
     # code used from here: http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
     # si no hay boxes, devuelve una lista vacía.
@@ -158,6 +157,7 @@ def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
     #print('Estas son las probababilidades: ', probs)
     return boxes, probs
 
+
 def apply_regr_np(X, T):
     """Apply regression layer to all anchors in one feature map
 
@@ -224,19 +224,19 @@ def apply_regr(x, y, w, h, tx, ty, tw, th):
         print(e)
         return x, y, w, h
 
+
 def calc_iou(R, img_data, C, class_mapping):
     """Converts from (x1,y1,x2,y2) to (x,y,w,h) format
 
     Args:
         R: bboxes, probs
     """
+
     bboxes = img_data[1]['boxes'] #Get all bounding boxes for every single image
     (width, height) = (img_data[1]['w'], img_data[1]['h'])
     # get image dimensions for resizing
     (resized_width, resized_height) = get_new_img_size(width, height, C.im_size)
     gta = np.zeros((len(bboxes), 4))
-
-    
 
     for bbox_num, bbox in enumerate(bboxes):
         # get the GT box coordinates, and resize to account for image resizing
