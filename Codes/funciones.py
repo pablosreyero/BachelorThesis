@@ -120,8 +120,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     random.shuffle(all_img_data)
 
     #Now we create all anchors
-    print('#########################')
-    print("Este es el all_img_data :", all_img_data)
+    if C.verbose: print("Este es el all_img_data :", all_img_data)
 
     # now let us compute all channel_means form all images
 
@@ -470,13 +469,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 img = torchvision.transforms.ToPILImage()(img)
             
                 #----Here we extract anchors in order to plot them on the processed image by the NN---------
-                xi = 'Imagen final'
-                
                 imagex = np.ascontiguousarray(X_prime, dtype=np.uint8)
                 #print('image.shape: ',)
 
                 #-------------REPRESENTACION CON EL CODIGO DE ARRIBA-------------
-                color = (255,0,0)
+                color = (255,0,0) # the red color of boxes
                 boxx = []
                 for j in R2:
                     if j not in boxx:
@@ -496,7 +493,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
                 plt.subplot(rows, cols, 2)
                 plt.imshow(imagex)
-                plt.title(xi)
+                plt.title('Imagen final')
                 
                 plt.show()
                 #'channels_last' for tensorflow, 'channels_first' for Theano
