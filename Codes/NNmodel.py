@@ -10,7 +10,6 @@ def get_img_output_length(width, height):
 
 def nn_base(input_tensor=None, trainable=False):
 
-
     input_shape = (None, None, 3)
 
     if input_tensor is None:

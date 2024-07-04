@@ -181,7 +181,7 @@ def reading_train_test (C,final_dic):
 
     os.chdir(route)
     for fichiers in os.listdir(route):
-        print(fichiers)
+        if C.verbose: print(fichiers)
         if fichiers == ('castings_test.txt'):
             image_title_test = [x for x in open('castings_test.txt').readlines()] #Aqui estamos recorriendo el archivo MODIFICADO, ANTES; image_title_test = [os.path.basename(x) for x in open('castings_test.txt').readlines()]
             image_title_test = [s.rstrip() for s in image_title_test] #Aqui le estamos quitando el simbolo de salto de linea \n

@@ -515,7 +515,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     rpn_accuracy_rpn_monitor.append(0)
                     rpn_accuracy_for_epoch.append(0)
                     continue
-                
+
                 # Find out the positive anchors and negative anchors
                 neg_samples = np.where(Y1[0, :, -1] == 1)
                 pos_samples = np.where(Y1[0, :, -1] == 0)
@@ -529,7 +529,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     pos_samples = pos_samples[0]
                 else:
                     pos_samples = []
-                #print('D')
 
                 rpn_accuracy_rpn_monitor.append(len(pos_samples))
                 rpn_accuracy_for_epoch.append((len(pos_samples)))
@@ -609,15 +608,15 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                         best_loss = curr_loss
                         model_all.save_weights(C.model_path)
 
-                    new_row = {'mean_overlapping_bboxes':round(mean_overlapping_bboxes, 3), 
-                            'class_acc':round(class_acc, 3), 
-                            'loss_rpn_cls':round(loss_rpn_cls, 3), 
-                            'loss_rpn_regr':round(loss_rpn_regr, 3), 
-                            'loss_class_cls':round(loss_class_cls, 3), 
-                            'loss_class_regr':round(loss_class_regr, 3), 
-                            'curr_loss':round(curr_loss, 3), 
-                            'elapsed_time':round(elapsed_time, 3), 
-                            'mAP': 0}
+                    new_row = {'mean_overlapping_bboxes':round(mean_overlapping_bboxes, 3),
+                               'class_acc':round(class_acc, 3),
+                               'loss_rpn_cls':round(loss_rpn_cls, 3),
+                               'loss_rpn_regr':round(loss_rpn_regr, 3),
+                               'loss_class_cls':round(loss_class_cls, 3),
+                               'loss_class_regr':round(loss_class_regr, 3),
+                               'curr_loss':round(curr_loss, 3),
+                               'elapsed_time':round(elapsed_time, 3),
+                               'mAP': 0}
 
                     record_df = record_df.append(new_row, ignore_index=True)
                     record_df.to_csv(record_path, index=0)

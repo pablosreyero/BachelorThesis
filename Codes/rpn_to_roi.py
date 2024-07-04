@@ -58,7 +58,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 			# X.shape = (18, 25)
 			# Y.shape = (18, 25)
 			X, Y = np.meshgrid(np.arange(cols),np.arange(rows))
-			print('XX: ,YY: ',X,Y)
+			if C.verbose: print('XX: ,YY: ',X,Y)
 			# Calculate anchor position and size for each feature map point
 			A[0, :, :, curr_layer] = X - anchor_x/2 # Top left x coordinate
 			A[1, :, :, curr_layer] = Y - anchor_y/2 # Top left y coordinate
