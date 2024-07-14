@@ -260,14 +260,14 @@ def get_anchor_gt(all_img_data, C, img_length_calc_function, mode='train'):
 					img_data_aug, x_img = augment(img_data, C, augment=False)
 
 				(width, height) = (img_data_aug[1]['w'],img_data_aug[1]['h']) #No entiendo porque esta haciendo esto y lo de la siguiente linea
-				(rows, cols, _) = x_img.shape #que significa la barra baja?
+				(rows, cols, _) = x_img.shape
 				assert cols == width
 				assert rows == height
 
 				# get image dimensions for resizing
 				(resized_width, resized_height) = get_new_img_size(width,height, C.im_size)
 
-				# resize the image so that smalles side is length = 300px
+				# resize the image so that smallest side is length = 300px
 				x_img = cv2.resize(x_img,(resized_width, resized_height), interpolation=cv2.INTER_CUBIC)
 				debug_img = x_img.copy()
 		

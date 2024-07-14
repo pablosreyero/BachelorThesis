@@ -138,7 +138,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     X, Y, image_data, debug_img, debug_num_pos = next(train_data_gen)
 
 
-    if C.verbose: print('Esto es el image data',image_data)
+    if C.verbose: print(f'Esto es el image data: {image_data}')
 
     #Aqui ya se empieza a pasar los datos de entreno
     if C.verbose:
@@ -337,8 +337,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         print('Already trained %dK batches'% (len(record_df)))
 
 #-------------------- SECOND PART OF THE TRAINING --------------------#
-    optimizer = Adam(learning_rate=1e-5)
-    optimizer_classifier = Adam(learning_rate=1e-5)
+    optimizer = Adam(learning_rate=C.learning_rate) # the original lr was 1e-5
+    optimizer_classifier = Adam(learning_rate=C.learning_rate)
     model_rpn.compile(optimizer=optimizer,
                       loss=[losses.rpn_loss_cls(num_anchors),
                             losses.rpn_loss_regr(num_anchors)])
