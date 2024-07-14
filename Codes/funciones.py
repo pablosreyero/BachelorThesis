@@ -493,7 +493,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
                 plt.subplot(rows, cols, 2)
                 plt.imshow(imagex)
-                plt.title('Imagen final')
+                plt.title('Imagen FINAL')
                 
                 plt.show()
                 #'channels_last' for tensorflow, 'channels_first' for Theano
