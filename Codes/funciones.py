@@ -334,11 +334,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         r_elapsed_time = record_df['elapsed_time']
         r_mAP = record_df['mAP']
 
-        print('Already train %dK batches'% (len(record_df)))
+        print('Already trained %dK batches'% (len(record_df)))
 
 #-------------------- SECOND PART OF THE TRAINING --------------------#
-    optimizer = Adam(lr=1e-5)
-    optimizer_classifier = Adam(lr=1e-5)
+    optimizer = Adam(learning_rate=1e-5)
+    optimizer_classifier = Adam(learning_rate=1e-5)
     model_rpn.compile(optimizer=optimizer,
                       loss=[losses.rpn_loss_cls(num_anchors),
                             losses.rpn_loss_regr(num_anchors)])
@@ -371,7 +371,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         best_loss = np.min(r_curr_loss)       
 
     #print('length of record_df: ',len(record_df)) #result of print -> 0!
-#-------------------- HERE WE'RE DELETING THE FIRST ENTRY IN THE OLD DICTIONNARY---------------
+#-------------------- HERE WE'RE DELETING THE FIRST ENTRY IN THE OLD DICTIONARY---------------
 #------Becasue, the debug image is the first one in the list of dictionnaries, so if we want to compare the original input image with the result image, we have to avoid
 # the first image in the old dictionnary since the first comparison to be made is with the second image
 
@@ -397,7 +397,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 X, Y, img_data, debug_img, debug_num_pos = next(train_data_gen)
                 # Train rpn model and get loss value [_, loss_rpn_cls,loss_rpn_regr]
                 #------------A PARTIR DE AQUI TERMINAMOS------------#
-
                 loss_rpn = model_rpn.train_on_batch(X, Y)
 
                 # Get predicted rpn from rpn model [rpn_cls, rpn_regr]
@@ -413,12 +412,11 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                                           K.set_image_data_format('channels_last'),
                                           use_regr=True,
                                           max_boxes=50,
-                                          overlap_thresh=0.4)
+                                          overlap_thresh=0.6) # the overlap thresh was 0.4
     
                 # Due to an update in keras library, image_dim_ordering()--->
                 # set_image_data_format('channels_last')
                 # Here I make a deep copy of R in order to further convert R's type
-                
                 R2 = copy.deepcopy(R) 
                 R2 = R2.tolist()
                 
