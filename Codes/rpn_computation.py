@@ -28,18 +28,16 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 		y_rpn_regr: list(num_bboxes, 4*y_rpn_overlap + y_rpn_regr)
 			y_rpn_regr: x1,y1,x2,y2 bunding boxes coordinates
 	"""
-	downscale = float(C.rpn_stride) #En este caso tenemos 16
-	anchor_sizes = C.anchor_box_scales   # 128, 256, 512
-	#print(anchor_sizes)
+	downscale = float(C.rpn_stride) # En este caso tenemos 16
+	anchor_sizes = C.anchor_box_scales  # 128, 256, 512
 	anchor_ratios = C.anchor_box_ratios  # 1:1, 1:2*sqrt(2), 2*sqrt(2):1
-	#print(anchor_ratios)
 	num_anchors = len(anchor_sizes) * len(anchor_ratios) # 3x3=9
 
 	# calculate the output map size based on the network architecture
 	(output_width, output_height) = img_length_calc_function(resized_width, resized_height)
 	#print('width: ',output_width)
 	#print('height: ',output_height)
-	n_anchratios = len(anchor_ratios)    # 3
+	n_anchratios = len(anchor_ratios) # 3
 	
 	# initialise empty output objectives
 	y_rpn_overlap = np.zeros((output_height, output_width, num_anchors))
