@@ -127,8 +127,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     print("Computing channel means of all images")
     channel_means = utils.calculate_channel_means(all_img_data)
     C.img_channel_mean = channel_means
-    print(f"--------------This is the channel_mean result: {C.img_channel_mean}--------------")
-    print(f"The dictionary has {len(all_img_data)}entries")
+    print(f"----This is the channel_mean result: {C.img_channel_mean}----")
 
     train_data_gen = get_anchor_gt(all_img_data,
                                    C,
@@ -158,6 +157,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         print('Number of positive anchors for this image: %d' % (debug_num_pos))
 
     if debug_num_pos==0:
+        print("PRINTING the DEBUG image")
         gt_x1, gt_x2 = image_data[1]['boxes'][0][0]*(X.shape[2]/image_data[1]['h']), image_data[1]['boxes'][0][2]*(X.shape[2]/image_data[1]['h'])
         gt_y1, gt_y2 = image_data[1]['boxes'][0][1]*(X.shape[1]/image_data[1]['w']), image_data[1]['boxes'][0][3]*(X.shape[1]/image_data[1]['w'])
         gt_x1,gt_y1, gt_x2, gt_y2 = int(gt_x1),int(gt_y1),int(gt_x2),int(gt_y2)
@@ -189,6 +189,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         plt.show()
 
     else:
+        print(f"PRINTING the DEBUG image (else statement) & debug_num_pos = {debug_num_pos}")
         cls = Y[0][0]
         pos_cls = np.where(cls==1)
         if C.verbose: print(pos_cls)
@@ -250,7 +251,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
             center = (pos_regr[1][i*4]*C.rpn_stride,
                       pos_regr[0][i*4]*C.rpn_stride)
 
-            if C.verbose: print('Center position of positive anchor: ', center)
+            print('Center position of positive anchor: ', center)
             cv2.circle(img, center, 3, color, -1)
             anc_w, anc_h = anchor_size*anchor_ratio[0],anchor_size*anchor_ratio[1]
             cv2.rectangle(img,
@@ -261,7 +262,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                             color,
                             2)
     # cv2.putText(img, 'pos anchor bbox '+str(i+1), (center[0]-int(anc_w/2), center[1]-int(anc_h/2)-5), cv2.FONT_HERSHEY_DUPLEX, 0.5, color, 1)
-    if C.verbose: print('GREEN bboxes ground-truth. other -> positive anchors')
+    print('GREEN bboxes ground-truth. other -> positive anchors')
     plt.figure(figsize=(8,8))
     plt.grid()
     plt.imshow(img)

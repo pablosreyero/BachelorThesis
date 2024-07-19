@@ -207,6 +207,7 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 	neg_locs = np.where(np.logical_and(y_rpn_overlap[0, :, :, :] == 0, y_is_box_valid[0, :, :, :] == 1))
 
 	num_pos = len(pos_locs[0])
+	print(f"\nThese are the NUMBER of positive positions: {num_pos}\n")
 
 	# one issue is that the RPN has many more negative than positive regions, so we turn off some of the negative
 	# regions. We also limit it to 256 regions.
