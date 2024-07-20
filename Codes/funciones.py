@@ -156,7 +156,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
         print('Number of positive anchors for this image: %d' % (debug_num_pos))
 
     if debug_num_pos==0:
-        print("PRINTING the DEBUG image")
         gt_x1, gt_x2 = image_data[1]['boxes'][0][0]*(X.shape[2]/image_data[1]['h']), image_data[1]['boxes'][0][2]*(X.shape[2]/image_data[1]['h'])
         gt_y1, gt_y2 = image_data[1]['boxes'][0][1]*(X.shape[1]/image_data[1]['w']), image_data[1]['boxes'][0][3]*(X.shape[1]/image_data[1]['w'])
         gt_x1,gt_y1, gt_x2, gt_y2 = int(gt_x1),int(gt_y1),int(gt_x2),int(gt_y2)
@@ -267,7 +266,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     plt.imshow(img)
     plt.show()
 
-    '''
     #-------------------Here we're building the model-------------------#
     input_shape_img = (None, None, 3)
 
@@ -620,7 +618,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                     break
 
             except Exception as e:
-                print('------------------------EXCEPCIÓN------------------------ \n')
+                print('------------------------EXCEPTION------------------------ \n')
                 print('Exception: {}'.format(e))
                 traceback.print_stack()
                 print('--------------------------------------------------------- \n')
@@ -662,7 +660,6 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     plt.plot(np.arange(0, r_epochs), record_df['curr_loss'], 'r')
     plt.title('total_loss')
     plt.show()
-    '''
     
     # plt.figure(figsize=(15,5))
     # plt.subplot(1,2,1)
