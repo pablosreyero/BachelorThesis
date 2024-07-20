@@ -124,10 +124,10 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
     # now let us compute all channel_means form all images
 
-    print("Computing channel means of all images")
+    if C.verbose: print("Computing channel means of all images")
     channel_means = utils.calculate_channel_means(all_img_data)
     C.img_channel_mean = channel_means
-    print(f"----This is the channel_mean result: {C.img_channel_mean}----")
+    if C.verbose: print(f"Channel_mean: {C.img_channel_mean}")
 
     train_data_gen = get_anchor_gt(all_img_data,
                                    C,
@@ -268,6 +268,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     plt.imshow(img)
     plt.show()
 
+    '''
     #-------------------Here we're building the model-------------------#
     input_shape_img = (None, None, 3)
 
@@ -662,6 +663,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
     plt.plot(np.arange(0, r_epochs), record_df['curr_loss'], 'r')
     plt.title('total_loss')
     plt.show()
+    '''
     
     # plt.figure(figsize=(15,5))
     # plt.subplot(1,2,1)
