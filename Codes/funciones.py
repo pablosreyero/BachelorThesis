@@ -561,7 +561,8 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 imagex = np.ascontiguousarray(X_prime, dtype=np.uint8)
                 #print('image.shape: ',)
 
-                #-------------REPRESENTACION CON EL CODIGO DE ARRIBA-------------
+                #-------------REPRESENTACION CON EL CODIGO DE ARRIBA-------------ç
+                # let's plot the bb with colors according to its metrics
                 color = (255,0,0) # the red color of boxes
                 boxx = []
                 for j in R2:
