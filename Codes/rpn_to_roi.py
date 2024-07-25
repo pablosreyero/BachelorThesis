@@ -90,6 +90,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 	#print('all_boxes BEFORE np.reshape :', A)
 	all_boxes = np.reshape(A.transpose((0, 3, 1, 2)), (4, -1)).transpose((1, 0))  # shape=(4050, 4)
 	all_probs = rpn_layer.transpose((0, 3, 1, 2)).reshape((-1))                   # shape=(4050,)
+	print(f'These are the probabilities before purging: {all_probs}')
 
 	x1 = all_boxes[:, 0]
 	y1 = all_boxes[:, 1]
@@ -108,9 +109,16 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 
 	# Apply non_max_suppression
 	# Only extract the bboxes. Don't need rpn probs in the later process
-	result = losses.non_max_suppression_fast(all_boxes, all_probs, overlap_thresh=overlap_thresh, max_boxes=max_boxes)[0]
-	#print('results size: ', len(result))
-	#print('result: ', result)
+	# result = losses.non_max_suppression_fast(all_boxes, all_probs, overlap_thresh=overlap_thresh, max_boxes=max_boxes)[0] # creo que con este 0 estaba cogiendo solo los BBs
+	result, probs = losses.non_max_suppression_fast(all_boxes, all_probs, overlap_thresh=overlap_thresh, max_boxes=max_boxes)
+	
+	
+	print(f'This is the size of the BBs list: {len(result)}')
+	print(f'This is the BBs list: {result}')
+
+	print(f'\nThis is the size of the probs list: {len(probs)}')
+	print(f'This is the probs list: {probs}')
+
 	return result
 
 

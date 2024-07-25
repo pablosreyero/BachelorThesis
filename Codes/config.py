@@ -43,7 +43,7 @@ class config:
 
             # Size to resize the smallest side of the image
             # Original in paper is 600. Set to 300 to save training time
-            self.im_size = 500 # this was 800, but way before 300
+            self.im_size = 300 # this was 800, but way before 300
 
             # image channel-wise mean to subtract
             # self.img_channel_mean = [103.939, 116.779, 123.68]

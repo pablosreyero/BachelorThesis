@@ -502,7 +502,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                                           C,
                                           K.set_image_data_format('channels_last'),
                                           use_regr=True,
-                                          max_boxes=50,
+                                          max_boxes=10, # this was 50
                                           overlap_thresh=0.6) # the overlap thresh was 0.4
     
                 # Due to an update in keras library, image_dim_ordering()--->

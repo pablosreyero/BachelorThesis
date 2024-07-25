@@ -154,7 +154,7 @@ def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
     # return only the bounding boxes that were picked using the integer data type
     boxes = boxes[pick].astype("int")
     probs = probs[pick]
-    #print('Estas son las probababilidades: ', probs)
+
     return boxes, probs
 
 
