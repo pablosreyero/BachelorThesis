@@ -13,6 +13,9 @@ from torchvision.io import read_image
 from torchvision.utils import draw_bounding_boxes
 import os
 import copy
+import matplotlib.pyplot as plt
+import torch
+import torchvision
 
 
 def list_sorting(item):
@@ -409,3 +412,108 @@ def augment(img_data, config, augment=True):
 	"""
 
 	return img_data_aug, img
+
+
+def plot_network_learning(C, X, R, P, aa, all_img_data):
+    '''
+    Plot the network suggestions (the learned BB by the network),
+    while training.
+    '''
+
+    R2 = copy.deepcopy(R) 
+    R2 = R2.tolist()
+    P = P.tolist()
+
+    print(f'Esto es el valor de R2 antes: {R2}')
+    print(f'Este es la nueva lista de probabilidades ya pasada a lista: {P}')
+
+    #Ahora multiplicamos todos los elementos del feature map por 16
+    for i in R2:
+        for posi, objeto in enumerate(i):
+            i[posi] = C.rpn_stride * objeto
+    
+    print('\nNUEVO R2: ',R2)
+    
+    X_prime = np.transpose(X,(2,1,3,0))
+    #print('Tamaño de X_PRIME, después del reshape: ',X_prime.shape)
+    X_prime = np.squeeze(X_prime)
+    X_prime = X_prime.astype(dtype=np.uint8)
+    
+    #print('Tamaño final de X_prime: ', X_prime.shape)
+    #print('ESTE ES EL TIPO DE VARIABLE DE X_prime: ', type(X_prime))
+    #print('CONTENIDO DE X_prime: ', X_prime)
+
+    #----Aqui sacamos los BB del image data para pintar los BB
+    # encima de la imágen original-----
+
+    #print('\nESTE ES EL IMG_DATA por si a caso: ', img_data)
+    #print('ESTE ES EL ALL_IMG_DATA por si a caso: ', all_img_data[aa+1])
+    
+    boxBB = []
+    boxBB2 = []
+    for j in all_img_data[aa+1][1]['boxes']:
+        for k in j:
+            if k != 'class':
+                boxBB.append(j[k])                        
+        boxBB2.append(copy.deepcopy(boxBB))
+        boxBB.clear()
+
+    img = read_image(all_img_data[aa+1][0])
+    #print('Esta es la imagen que estamos leyendo: ',all_img_data[aa+1][0])
+    aa+=1
+    boxBB2 = torch.tensor(boxBB2, dtype=torch.int)
+    img = draw_bounding_boxes(img,
+                                boxBB2,
+                                width=1,
+                                colors='red',
+                                fill=True)
+                        
+    # transform this image to PIL image
+    img = torchvision.transforms.ToPILImage()(img)
+
+    #----Here we extract anchors in order to plot them on the processed image by the NN---------
+    imagex = np.ascontiguousarray(X_prime, dtype=np.uint8)
+    #print('image.shape: ',)
+
+    #-------------REPRESENTACION CON EL CODIGO DE ARRIBA-------------ç
+    # let's plot the bb with colors according to its metrics
+
+    # firstly let's find both MAX & MIN values on the PROBS list
+    length_P = len(P)
+    max_P = max(P)
+    min_P = min(P)
+
+    # Normalize the probabilities between max & min and map them
+    P_normed = plt.Normalize(vmin=min(P), vmax=max(P))
+    cmap = plt.cm.viridis
+
+    # create the color codes
+    colors = cmap(P_normed(P))
+    colors_rgb = [tuple(int(c * 255) for c in color[:3]) for color in colors]
+
+    print(f"These are the colors_ {colors_rgb}")
+    print(f"\nLength of the PROBS list: {length_P}")
+    print(f"Max value of the PROBS list: {max_P}")
+    print(f"Min value of the PROBS list: {min_P}\n")
+
+    # color = (255,0,0) # the red color of boxes
+    boxx = []
+    for j, color in zip(R2, colors_rgb):
+        print(f'BB: {j}, Color: {color}')
+        if j not in boxx:
+            boxx.append(j)
+            cv2.rectangle(imagex, (j[0], j[1]), (j[0]+j[2], j[1]+j[3]), color, 2)
+
+    rows, cols = 1, 2
+    plt.subplot(rows, cols, 1)
+    plt.imshow(img)
+    plt.title('Imagen ORIGINAL')
+
+    plt.subplot(rows, cols, 2)
+    plt.imshow(imagex)
+    plt.title('Imagen FINAL')
+    plt.colorbar(plt.cm.ScalarMappable(norm=P_normed, cmap=cmap), label='Probabilities')
+    
+    plt.show()
+
+    return aa
