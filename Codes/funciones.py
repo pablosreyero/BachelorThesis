@@ -497,28 +497,30 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 # print('Tamaño P_rpn[0] y P_rpn[1]', P_rpn[0].shape,P_rpn[1].shape)
                 # R = rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(),
                 # use_regr=True, overlap_thresh=0.7, max_boxes=300)
-                R = rpn_to_roi.rpn_to_roi(P_rpn[0],
-                                          P_rpn[1],
-                                          C,
-                                          K.set_image_data_format('channels_last'),
-                                          use_regr=True,
-                                          max_boxes=10, # this was 50
-                                          overlap_thresh=0.6) # the overlap thresh was 0.4
+                R, P = rpn_to_roi.rpn_to_roi(P_rpn[0],
+                                             P_rpn[1],
+                                             C,
+                                             K.set_image_data_format('channels_last'),
+                                             use_regr=True,
+                                             max_boxes=10, # this was 50
+                                             overlap_thresh=0.6) # the overlap thresh was 0.4
     
                 # Due to an update in keras library, image_dim_ordering()--->
                 # set_image_data_format('channels_last')
                 # Here I make a deep copy of R in order to further convert R's type
                 R2 = copy.deepcopy(R) 
                 R2 = R2.tolist()
-                
-                #print('\nR2 ORIGINAL: ', R2)
+                P = P.tolist()
+
+                print(f'Esto es el valor de R2 antes: {R2}')
+                print(f'Este es la nueva lista de probabilidades ya pasada a lista: {P}')
 
                 #Ahora multiplicamos todos los elementos del feature map por 16
                 for i in R2:
                     for posi, objeto in enumerate(i):
                         i[posi] = C.rpn_stride * objeto
                 
-                #print('\nNUEVO R2: ',R2)
+                print('\nNUEVO R2: ',R2)
                 
                 X_prime = np.transpose(X,(2,1,3,0))
                 #print('Tamaño de X_PRIME, después del reshape: ',X_prime.shape)
@@ -563,18 +565,31 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
 
                 #-------------REPRESENTACION CON EL CODIGO DE ARRIBA-------------ç
                 # let's plot the bb with colors according to its metrics
-                color = (255,0,0) # the red color of boxes
+
+                # firstly let's find both MAX & MIN values on the PROBS list
+                length_P = len(P)
+                max_P = max(P)
+                min_P = min(P)
+
+                # Normalize the probabilities between max & min and map them
+                P_normed = plt.Normalize(vmin=min(P), vmax=max(P))
+                cmap = plt.cm.viridis
+
+                # create the color codes
+                colors = cmap(P_normed(P))
+                colors_rgb = [tuple(int(c * 255) for c in color[:3]) for color in colors]
+
+                print(f"These are the colors_ {colors_rgb}")
+                print(f"\nLength of the PROBS list: {length_P}")
+                print(f"Max value of the PROBS list: {max_P}")
+                print(f"Min value of the PROBS list: {min_P}\n")
+
+                # color = (255,0,0) # the red color of boxes
                 boxx = []
-                for j in R2:
+                for j, color in zip(R2, colors_rgb):
                     if j not in boxx:
                         boxx.append(j)
-                        cv2.rectangle(imagex,
-                                      (j[0],
-                                       j[1]),
-                                       (j[0]+j[2],
-                                        j[1]+j[3]),
-                                        color,
-                                        2)
+                        cv2.rectangle(imagex, (j[0], j[1]), (j[0]+j[2], j[1]+j[3]), color, 2)
 
                 rows, cols = 1, 2
                 plt.subplot(rows, cols, 1)
@@ -584,6 +599,7 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 plt.subplot(rows, cols, 2)
                 plt.imshow(imagex)
                 plt.title('Imagen FINAL')
+                plt.colorbar(plt.cm.ScalarMappable(norm=P_normed, cmap=cmap), label='Probabilidades')
                 
                 plt.show()
                 #'channels_last' for tensorflow, 'channels_first' for Theano

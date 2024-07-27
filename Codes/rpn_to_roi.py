@@ -119,7 +119,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 	print(f'\nThis is the size of the probs list: {len(probs)}')
 	print(f'This is the probs list: {probs}')
 
-	return result
+	return result, probs
 
 
 
