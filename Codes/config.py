@@ -19,7 +19,8 @@ class config:
             # Print the process or not
             self.verbose = False
             self.train_verbose = True
-            self.show_debug_image = False   
+            self.show_debug_image = False
+            self.show_imgs_while_train = False  
 
             # Name of base network
             self.network = 'vgg'

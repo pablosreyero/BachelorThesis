@@ -507,7 +507,13 @@ def main(C,output_weight_path,record_path,base_weight_path,config_output_filenam
                 # Due to an update in keras library, image_dim_ordering()--->
                 # set_image_data_format('channels_last')
                 # Here I make a deep copy of R in order to further convert R's type
-                aa = utils.plot_network_learning(C, X, R, P, aa, all_img_data)
+                if C.show_imgs_while_train:
+                    aa = utils.plot_network_learning(C,
+                                                     X,
+                                                     R,
+                                                     P,
+                                                     aa,
+                                                     all_img_data)
                 #'channels_last' for tensorflow, 'channels_first' for Theano
                 # and 'channels_last' for CNTK (Microsoft Cognitive Toolkit)
                 
